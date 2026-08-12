@@ -1,0 +1,702 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>为 Lenovo Smart Display 8 适配 LineageOS 的记录</title><meta name="description" content="勤能补拙，熟能生巧"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@latest/dist/fancybox/fancybox.css"><link rel="stylesheet" href="/prism/prism.css"><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Sidebar.DS-lAe7u.css"></head> <body> <header id="header" class="clearfix"> <div class="container"> <div class="row"> <div class="site-name col-mb-12 col-9"> <a id="logo" href="/">azwhikaru&#39;s Lab</a>
+                    <p class="description">勤能补拙，熟能生巧</p> </div> <div class="site-search col-3 kit-hidden-tb"> <form id="search" method="get" action="/search" role="search"> <label for="s" class="sr-only">搜索关键字</label> <input type="text" id="s" name="q" class="text" placeholder="输入关键字搜索"> <button type="submit" class="submit">搜索</button> </form> </div> <div class="col-mb-12"> <nav id="nav-menu" class="clearfix" role="navigation"> <a class href="/">首页</a><a class href="/about">关于</a> </nav> </div> </div> </div> </header> <div id="body"> <div class="container"> <div class="row">  <div class="col-mb-12 col-8" id="main" role="main"> <article class="post" itemscope itemtype="http://schema.org/BlogPosting"> <h1 class="post-title" itemprop="name headline"> 为 Lenovo Smart Display 8 适配 LineageOS 的记录 </h1> <ul class="post-meta"> <li> <i class="fa-regular fa-clock"></i> <time datetime="2024-08-27T21:39:00.000Z" itemprop="datePublished"> 2024-08-27 </time> </li> <li> <i class="fa-regular fa-folder"></i> <a href="/category/Android">Android</a> </li> </ul> <div class="post-content" itemprop="articleBody">  <p>适配完大概一个月了，还是系统性记录一下，以免自己忘了，当然如果有人刷到这篇文章，希望能给你一些帮助</p>
+<p>文章不是线性的，可以一口气全部看完再上手</p>
+<p>从 0 到 1 很困难，不要放弃。<em>自助者天助</em></p>
+<h2 id="软硬件要求">软硬件要求</h2>
+<p>硬件当然是越强越好。为了刷机和调试方便，我是在 Windows 11 里开的 VMware 虚拟机，R7 5800X 16 线程全开 + 16GB 内存，从零开始跑一遍整包 OTA 大概 40-50 分钟 (没开 ccache，开了还能快一些)，考虑到虚拟机损耗，实体机跑起来应该能再快一些</p>
+<p>因为适配的 Android 8.1，源码并不大，一套内核 + LineageOS 源码编译完目录大小也不到 200G，好像 150G 都不到，加上系统占用，最少给 200G 就差不多了</p>
+<p>软件方面，因为 Android 8.1 还需要用到 Python 2，所以用的 Debian 11。Java 的话，是 OpenJDK 8</p>
+<p>最后，强烈建议把源码的改动存到 Git 上，如果嫌 Github 之类公网的麻烦，本地搭一个 Gitea 也不错，否则改动多了，自己都忘记改了什么</p>
+<p>对文章里描述不清，或者看不懂的部分，也 <strong>请参考 commit <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commits?author=azwhikaru">记录</a>，源码在 <a href="https://github.com/orgs/lenovo-sparrow-dev/repositories">这里</a></strong></p>
+<h2 id="准备内核源码">准备内核源码</h2>
+<p>这块可以随机应变下。联想官方虽然有给 Lenovo Smart Display 8 开源，但是源码是 Linux 3.10.X 的，机器上的内核版本实际上是 3.18.X。有人在联想官方论坛反馈，不过到现在也没有更新源码</p>
+<p>联想有一台相似的机子 (不敢说完全相同，因为拆机之后发现主板丝印实际上是不一样的) 叫做 ThinkSmart View，这台机子开出的源码是 3.18.X 的，因此把它的<a href="https://github.com/lenovo-sparrow-dev/android_kernel_lenovo_apq8053">源码</a> 借过来用</p>
+<p>如果你想给没有开源内核的机子编译内核，可以找找有没有相似的机子，然后补一下 dts、驱动、参数试试。实在不行也可以试试 prebuilt 内核，据说 LineageOS 对这块没什么要求，之前看见过一个红米的机子用 prebuilt 内核</p>
+<h2 id="适配-device">适配 device</h2>
+<p>这块是最复杂的，几乎找不到教程，<del>唯一</del> 的方法是抄别人的 device</p>
+<p>不是我说的，LineageOS 官方的 <a href="https://wiki.lineageos.org/faq#where-are-guides-so-i-can-port-lineageos-to-my-unsupported-device">FAQ</a> 就是这么说的</p>
+<blockquote>
+<h2 id="where-are-guides-so-i-can-port-lineageos-to-my-unsupported-device">Where are guides so I can port LineageOS to my unsupported device?</h2>
+<ul>
+<li>There are none</li>
+<li>See what other, similar devices did to get them to work.</li>
+</ul>
+</blockquote>
+<h3 id="提取-vendor-proprrietary">提取 vendor proprrietary</h3>
+<p>就是提取设备官方系统中的 vendor 专有部分，例如摄像头、麦克风、网卡等设备的驱动，例如一些 so 库。这些可能是不开源的，别担心，就连你的设备制造商也没有这些源码，它们也是把第三方厂商提供的成品文件加进 SDK 里编译的</p>
+<p>这一步要做的是找出哪些属于设备专有的 blobs，这里可以从相同 SoC 的设备的 device 里抄到，如果找不到，退而求其次，找相同版本的同平台设备。当然即使有相同的 SoC，主板也是不同的，例如它们可能使用不同的摄像头、麦克风，不过通常能提取到最基础的 blobs，足以支持系统启动，在进入系统后遇到摄像头打不开之类的问题，再抓 Log 看看是缺少什么驱动</p>
+<p>装好 adb，连接设备，然后找一个与你设备相似的 device。例如这里我找到了联想 P2 的，也是联想的，也是骁龙 625，也是 Android 8.1</p>
+<p><img alt="image-20240827210507182" loading="lazy" decoding="async" width="735" height="235" src="/_astro/b9146a4a00d664f00adaa60db1d0df6258a0c4e6251b5680ce13f7f1442934f0.webp" srcset=""></p>
+<p>打开 proprietary-files.txt，这就是设备专有 blobs 的列表了</p>
+<p><img alt="image-20240827210653694" loading="lazy" decoding="async" width="669" height="700" src="/_astro/f59446edb65365b4b2218f611d4e81cc703cd2076cdd3d41311df03c1488eeae.webp" srcset=""></p>
+<p>打开 device 下的 extract-files.sh，运行这个脚本，就会通过 adb 从设备中提取 blobs 了。在运行之前，修改其中的 DEVICE 和 VENDOR</p>
+<pre><code>DEVICE=kuntao
+VENDOR=lenovo
+</code></pre>
+<p>因为也是联想的，所以这里 VENDOR 就不改了。DEVICE 改成正确的设备代号，比如 sparrow，这样提取的文件就会存在源码目录下的 vendor/lenovo/sparrow</p>
+<p>运行 extract-files.sh，因为是借用别的设备的，列表肯定有出入。遇见 File not found 之类的报错，说明你设备的 firmware 里并没有这个文件，在  proprietary-files.txt 删掉那行。部分带 hash 的提示 Miss match，把 hash 删掉，直到运行 extract-files.sh 可以不报错跑完</p>
+<p>剩下的主要靠自己判断了：哪些要删，哪些要加</p>
+<p>最后运行 device 下的 setup-makefiles.sh，会在 vendor/lenovo/sparrow 下生成 Makefile，这样 vendor device 就准备好了</p>
+<h3 id="修改-device">修改 device</h3>
+<p>修改同 SoC 设备的 device 里的参数，例如分区大小、Kernel 参数等。可以参考一下这个 <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commit/ff098a1d8f3a744031345af3ffae41d946816559">commit</a></p>
+<p>不要一口气抄太多，特别是自己也不理解的参数就别加了。首先需要保证源码可以跑起来，能够生成 OTA Package 和镜像，再考虑修 Bug</p>
+<p>完整的 commit 记录可以参考 <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commits?author=azwhikaru">这里</a></p>
+<h2 id="开始编译">开始编译</h2>
+<p>准备好 device 后，回到源码目录执行</p>
+<pre><code>source build/envsetup.sh
+</code></pre>
+<p>然后 lunch 选中我们的 device 和构建变体</p>
+<pre><code>lunch lenovo_sparrow-eng
+</code></pre>
+<p>使用 eng 变体是为了默认开启 adb 和一些调试功能，要注意选了 eng 就不能用 brunch 了， brunch 会默认选择 userdebug 构建</p>
+<p>使用 otapackage 选项构建 eng</p>
+<pre><code>make otapackage -j16
+</code></pre>
+<p>也可以单独构建想要的镜像，例如</p>
+<pre><code>make systemimage
+</code></pre>
+<h2 id="报错">报错</h2>
+<p>准备好 device、vendor proprrietary、kernel，理论上现在就可以开始编译了，但是编译 <strong>不可能</strong> 一次通过。受到各种软件版本的影响，即使是网上搜到的解决方法有时也不那么有用，会看报错至关重要，并且要试着 <strong>去看源码</strong></p>
+<p>下面记录一些自己遇到并解决的问题</p>
+<h3 id="zygote-不启动">Zygote 不启动</h3>
+<blockquote>
+<p>32 位 device 改 64 位时没有修改 core_base.mk 成 core_64_bit.mk 导致</p>
+</blockquote>
+<p>参考 <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commit/ff098a1d8f3a744031345af3ffae41d946816559#diff-ba5890c0b164cad304ef7d7d89476fc4e8465f1625898b7f05a890e1a089de6e">commit</a></p>
+<p>原 device 为 32 位，修改为 64 位后编译，开机停留在 bootanimation，伴随报错，修改回 32 位后编译正常启动</p>
+<pre><code>Could not create image space with image file '/system/framework/boot.art'. Attempting to fall back to imageless running. Error was: Cannot relocate image /system/framework/boot.art to : Only the zygote can create the global boot image.
+</code></pre>
+<p>在源码中搜索 <code>Could not create image space with image file</code>，这个报错出现在 <code>art/runtime/gc/space/image_space.cc</code> 的 <code>LoadBootImage</code> 函数中</p>
+<pre><code class="language-c">error = true;
+LOG(ERROR) &#x3C;&#x3C; "Could not create image space with image file '" &#x3C;&#x3C; image_file_name &#x3C;&#x3C; "'. "
+  &#x3C;&#x3C; "Attempting to fall back to imageless running. Error was: " &#x3C;&#x3C; error_msg
+  &#x3C;&#x3C; "\nAttempted image: " &#x3C;&#x3C; image_name;
+break;
+</code></pre>
+<p><code>error_msg</code> 变量是通过对 <code>CreateBootImage</code> 函数的调用得到的</p>
+<pre><code class="language-c">std::unique_ptr&#x3C;space::ImageSpace> boot_image_space_uptr = CreateBootImage(
+        image_name.c_str(),
+        image_instruction_set,
+        index > 0,
+        &#x26;error_msg);
+</code></pre>
+<p>关键在最后一句 <code>Only the zygote can create the global boot image.</code></p>
+<p>在源码中搜索，这个报错同样出现在 <code>art/runtime/gc/space/image_space.cc</code></p>
+<pre><code class="language-c">static bool ImageCreationAllowed(bool is_global_cache,
+                                 const InstructionSet isa,
+                                 std::string* error_msg) {
+  // Anyone can write into a "local" cache.
+  if (!is_global_cache) {
+    return true;
+  }
+
+  // Only the zygote running as root is allowed to create the global boot image.
+  // If the zygote is running as non-root (and cannot write to the dalvik-cache),
+  // then image creation is not allowed..
+  if (Runtime::Current()->IsZygote()) {
+    return CanWriteToDalvikCache(isa);
+  }
+
+  *error_msg = "Only the zygote can create the global boot image.";
+  return false;
+}
+</code></pre>
+<p>报错是因为当前 Runtime 并不是 Zygote 导致的，换句话说就是没有 Zygote 进程</p>
+<blockquote>
+<p>Zygote 是 Android 系统创建新进程的核心进程，负责启动 Dalvik 虚拟机，加载一些必要的系统资源和系统类，启动 system_server 进程，随后进入等待处理 app 应用请求</p>
+<p>(以上这段话摘自网络，被引用次数太多，出处未知)</p>
+</blockquote>
+<p><img alt="4322319cfe0cd30ac51b055d13023f2d" loading="lazy" decoding="async" width="363" height="100" src="/_astro/c1a2928a005b71694ff2cea3b2e7a5e6537f8f22ad38dcaca9cdb5c306129655.webp" srcset=""></p>
+<p>Dalvik 起不来，Android 自然也无法启动</p>
+<p><img alt="image-20240721010915233" loading="lazy" decoding="async" width="788" height="785" src="/_astro/8f1e96c16a3902fdae34325aa056829ac049064300f1b82b253cf246b0c08a57.webp" srcset=""></p>
+<p>Android 的系统服务和框架都是要运行在 Android Runtime 也就是 Dalvik 虚拟机上的，虚拟机无法启动，则任何 Android 的服务都无法启动</p>
+<p>Zygote 服务由 rootdir 下的 <code>init.zygote*.rc</code> 定义，在 <code>init.rc</code> 中被调用</p>
+<pre><code>import /init.${ro.zygote}.rc
+</code></pre>
+<p>从 Android 5 开始，Android 支持了 64 位，因此 Zygote 也做了 32 和 64 位的区分</p>
+<p>Zygote 有如下 4 种模式，也就是 <code>ro.zygote</code> 可以有如下 4 个值</p>
+<ol>
+<li>zygote32: 纯 32 位模式</li>
+<li>zygote64: 纯 64 位模式</li>
+<li>zygote32_64: 32 位模式为主，64 位模式为辅 (secondary)。即 <strong>系统框架是 32 位</strong>，但也支持 64 位的应用</li>
+<li>zygote64_32: 64 位模式为主，32 位模式为辅 (secondary)。即 <strong>系统框架是 64 位</strong>，但也支持 32 位的应用</li>
+</ol>
+<p>显然针对一般的 64 位设备，zygote64_32 用得比较多</p>
+<p>以下是一段默认的 <code>init.zygote32.rc</code>，Zygote 服务的可执行文件是 <code>/system/bin/app_process</code></p>
+<pre><code>service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+    class main
+    priority -20
+    user root
+    group root readproc
+    socket zygote stream 660 root system
+    onrestart write /sys/android_power/request_state wake
+    onrestart write /sys/power/state on
+    onrestart restart audioserver
+    onrestart restart cameraserver
+    onrestart restart media
+    onrestart restart netd
+    onrestart restart wificond
+    writepid /dev/cpuset/foreground/tasks
+</code></pre>
+<p>以下是一段默认的 <code>init.zygote64_32.rc</code>。除了 <code>/system/bin/app_process64</code> 的 64 位 Zygote，还定义了一个名为 <code>zygote_secondary</code> 的 32 位 Zygote</p>
+<pre><code>service zygote /system/bin/app_process64 -Xzygote /system/bin --zygote --start-system-server --socket-name=zygote
+    class main
+    priority -20
+    user root
+    group root readproc
+    socket zygote stream 660 root system
+    onrestart write /sys/android_power/request_state wake
+    onrestart write /sys/power/state on
+    onrestart restart audioserver
+    onrestart restart cameraserver
+    onrestart restart media
+    onrestart restart netd
+    onrestart restart wificond
+    writepid /dev/cpuset/foreground/tasks
+
+service zygote_secondary /system/bin/app_process32 -Xzygote /system/bin --zygote --socket-name=zygote_secondary --enable-lazy-preload
+    class main
+    priority -20
+    user root
+    group root readproc
+    socket zygote_secondary stream 660 root system
+    onrestart restart zygote
+    writepid /dev/cpuset/foreground/tasks
+</code></pre>
+<p>Zygote 服务在 <code>init.rc</code> 中是这样被调用的</p>
+<pre><code># It is recommended to put unnecessary data/ initialization from post-fs-data
+# to start-zygote in device's init.rc to unblock zygote start.
+on zygote-start &#x26;&#x26; property:ro.crypto.state=unencrypted
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+
+on zygote-start &#x26;&#x26; property:ro.crypto.state=unsupported
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+
+on zygote-start &#x26;&#x26; property:ro.crypto.state=encrypted &#x26;&#x26; property:ro.crypto.type=file
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+</code></pre>
+<p>再看 <code>init.rc</code> 中对 <code>zygote-start</code> 的定义，启动 Zygote 的条件是挂载/解密 /data 后</p>
+<pre><code># Now we can mount /data. File encryption requires keymaster to decrypt
+# /data, which in turn can only be loaded when system properties are present.
+trigger post-fs-data
+
+# Now we can start zygote for devices with file based encryption
+trigger zygote-start
+</code></pre>
+<p>看完了 Zygote 启动需要的条件，回到 device 上</p>
+<p><strong>用 getprop 一看当前设备的 <code>ro.zygote</code> 值，居然还是 <code>zygote32</code>，怪不得启动不了 64 位系统</strong></p>
+<p>如果直接在 device 的 Makefile 里覆盖 <code>ro.zygote</code> 属性，会出现报错 “cannot assign to readonly variable”</p>
+<p>这是因为这个属性并不需要手动指定，它已经定义在 <code>build/make/target/product</code> 下的 Makefile 中指定，并在 device 中 include</p>
+<p>检查 device，发现了对 <code>build/make/target/product</code> 下的 Makefile 的引用</p>
+<pre><code class="language-makefile">$(call inherit-product, $(SRC_TARGET_DIR)/product/core_base.mk)
+</code></pre>
+<p>查看 <code>core_base.mk</code>，其又引用了 <code>core_minimal.mk</code>，其中定义了</p>
+<pre><code class="language-makefile">PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    ro.zygote=zygote32
+PRODUCT_COPY_FILES += \
+    system/core/rootdir/init.zygote32.rc:root/init.zygote32.rc
+</code></pre>
+<p>再查看同一目录下的 <code>core_64_bit.mk</code></p>
+<pre><code class="language-makefile"># Copy the 64-bit primary, 32-bit secondary zygote startup script
+PRODUCT_COPY_FILES += system/core/rootdir/init.zygote64_32.rc:root/init.zygote64_32.rc
+
+# Set the zygote property to select the 64-bit primary, 32-bit secondary script
+# This line must be parsed before the one in core_minimal.mk
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += ro.zygote=zygote64_32
+</code></pre>
+<p>问题解决，只需要把 device 中对 <code>core_base.mk</code> 的引用改成 <code>core_64_bit.mk</code> 即可</p>
+<h3 id="提前装载分区">提前装载分区</h3>
+<blockquote>
+<p>Google 在 Project Treble 中加入的特性</p>
+</blockquote>
+<p>参考 <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commit/f72c18050a3e499c5c6e06541b50d652972bcb90">commit</a></p>
+<p>给这台机子适配 LineageOS 的时候需要原机的分区表，提取了 <code>/vendor/etc/fstab.qcom</code></p>
+<pre><code># Android fstab file.
+# The filesystem that contains the filesystem checker binary (typically /system) cannot
+# specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
+
+#TODO: Add 'check' as fs_mgr_flags with data partition.
+# Currently we dont have e2fsck compiled. So fs check would failed.
+
+#&#x3C;src>                                      &#x3C;mnt_point>  &#x3C;type>  &#x3C;mnt_flags and options>                     &#x3C;fs_mgr_flags>
+#/dev/block/bootdevice/by-name/system        /system      ext4    ro,barrier=1,discard                        wait,verify
+/dev/block/bootdevice/by-name/userdata      /data        ext4    noatime,nosuid,nodev,barrier=1,noauto_da_alloc,discard  wait,forceencrypt=footer,quota
+/devices/soc/7864900.sdhci/mmc_host*        /storage/sdcard1 vfat  nosuid,nodev         wait,voldmanaged=sdcard1:auto,noemulatedsd,encryptable=footer
+/devices/soc/7000000.ssusb/7000000.dwc3/xhci-hcd.0.auto*  /storage/usbotg  vfat  nosuid,nodev  wait,voldmanaged=usbotg:auto
+/dev/block/bootdevice/by-name/config        /frp         emmc    defaults                                    defaults
+/dev/block/bootdevice/by-name/misc          /misc        emmc    defaults                                    defaults
+/dev/block/bootdevice/by-name/cache         /cache       ext4    noatime,nosuid,nodev,barrier=1              wait
+/dev/block/bootdevice/by-name/modem         /firmware    vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337,context=u:object_r:firmware_file:s0 wait
+/dev/block/bootdevice/by-name/dsp           /dsp         ext4    ro,nosuid,nodev,barrier=1                   wait
+</code></pre>
+<p>原机 fstab 中的 <code>/system</code> 是被注释掉的，甚至没有 <code>/vendor</code>，那为什么开机后还是能挂载这两个分区？</p>
+<blockquote>
+<p>msm8953_64:/ # df -h
+Filesystem            Size  Used Avail Use% Mounted on
+rootfs                840M  2.7M  838M   1% /
+tmpfs                 880M  712K  879M   1% /dev
+/dev/block/mmcblk0p48 1.2G  1.1G  131M  90% /system
+/dev/block/mmcblk0p45 477M  432M   45M  91% /vendor
+tmpfs                 880M     0  880M   0% /mnt
+/dev/block/mmcblk0p46  93M  420K   92M   1% /cache
+/dev/block/mmcblk0p1   84M   27M   57M  33% /firmware
+/dev/block/mmcblk0p12  12M  8.1M  3.5M  70% /dsp
+/dev/block/mmcblk0p47  27M  324K   27M   2% /persist
+/dev/block/dm-0       4.2G  952M  3.3G  22% /data
+/data/media           4.2G  952M  3.3G  22% /mnt/runtime/default/emulated</p>
+</blockquote>
+<p>在 Google 的文档里发现了对这个问题的解释：<a href="https://source.android.com/docs/core/architecture/kernel/mounting-partitions-early">提前装载分区 | Android Open Source Project</a> (中文翻译得不是那么准确，还是建议看英文的)</p>
+<blockquote>
+<p>支持 Treble 的设备必须启用第一阶段装载，以确保 <code>init</code> 可以加载分布在 <code>system</code> 和 <code>vendor</code> 分区的 <a href="https://source.android.com/docs/security/features/selinux?hl=zh-cn">安全增强型 (SELinux)</a> 政策 Fragment。此访问权限还可实现在内核启动后尽快加载内核模块。</p>
+<p>如需执行提前装载，Android 必须有权访问模块所在的文件系统。Android 8.0 及更高版本支持在 <code>init</code> 的第一阶段（即初始化 SElinux 之前）装载 <code>/system</code>、<code>/vendor</code> 或 <code>/odm</code>。</p>
+</blockquote>
+<p>Treble 部分就不再详细介绍了，简单来说就是将 Android 系统本身与硬件供应商的代码隔离，并提供了一个统一的接口供 Android 访问硬件供应商部分代码，从此开发者就只需要更新 Android 系统本身，并通过统一接口连接 Android 和硬件供应商部分代码</p>
+<blockquote>
+<p>在 Android 9 及更低版本中，设备可以使用 <a href="https://source.android.com/docs/core/architecture/dto?hl=zh-cn">设备树叠加层 (DTO)</a> 为提前装载的分区指定 <code>fstab</code> 条目</p>
+</blockquote>
+<p>也就是说，当前 <code>/system</code> 和 <code>/vendor</code> 的 fstab 是被定义在 Device Tree 中的，在 kernel 源码的 dts 中，如下</p>
+<pre><code>firmware {
+
+		android {
+			compatible = "android,firmware";
+
+			fstab {
+				compatible = "android,fstab";
+
+				vendor {
+					compatible = "android,vendor";
+					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/vendor";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1,discard";
+					fsmgr_flags = "wait";
+					status = "ok";
+				};
+
+				system {
+					compatible = "android,system";
+					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1,discard";
+					fsmgr_flags = "wait";
+					status = "ok";
+				};
+			};
+		};
+	};
+</code></pre>
+<p>这就解释了为什么 fstab 中没有 <code>/system</code> 和 <code>/vendor</code>，却依旧可以正常挂载这两个分区</p>
+<h3 id="data-加解密">Data 加解密</h3>
+<blockquote>
+<p>全盘加密是在 Android 4.4 版中引入的，不过 Android 5.0 中又引入了以下新功能</p>
+<ul>
+<li>新增了快速加密方式，这种加密方式只会对数据分区中已使用的分块进行加密，以免首次启动用时过长。目前只有 EXT4 和 F2FS 文件系统支持快速加密。</li>
+<li>添加了 <a href="https://source.android.com/docs/core/storage/config?hl=zh-cn"><code>forceencrypt</code> fstab 标记</a>，以便在首次启动时进行加密。</li>
+<li>添加了对解锁图案和无密码加密的支持。</li>
+<li>添加了由硬件支持的加密密钥存储空间，该空间使用可信执行环境（TEE，例如 TrustZone）的签名功能。如需了解详情，请参阅 <a href="https://source.android.com/docs/security/encryption/full-disk?hl=zh-cn#storing_the_encrypted_key">存储已加密的密钥</a>。</li>
+</ul>
+</blockquote>
+<p>最后关闭了自动加密，参考 <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commit/389f413994c8182c411d5bbe660953312352f4a2">commit</a></p>
+<p>为了启用硬件加密，需要在 device 里加入如下配置</p>
+<ul>
+<li>
+<p>BoardConfig.mk</p>
+<pre><code class="language-makefile"># Encryption
+TARGET_HW_DISK_ENCRYPTION := true
+TARGET_LEGACY_HW_DISK_ENCRYPTION := true
+TARGET_CRYPTFS_HW_PATH := vendor/qcom/opensource/cryptfs_hw
+</code></pre>
+<p>其中 <code>TARGET_CRYPTFS_HW_PATH</code> 需要指向高通的 <code>cryptfs_hw</code> 模块</p>
+</li>
+<li>
+<p>device.mk</p>
+<pre><code class="language-makefile"># HW crypto
+PRODUCT_PACKAGES += \
+    vendor.qti.hardware.cryptfshw@1.0-service-qti.qsee
+</code></pre>
+</li>
+<li>
+<p>proprietary-files.txt</p>
+<pre><code># DRM and SEE
+vendor/bin/qseecomd
+vendor/lib/libQSEEComAPI.so
+vendor/lib64/libQSEEComAPI.so
+vendor/lib/libdiag.so
+vendor/lib64/libdiag.so
+vendor/lib/libdrmfs.so
+vendor/lib64/libdrmfs.so
+vendor/lib/libdrmtime.so
+vendor/lib64/libdrmtime.so
+vendor/lib/librpmb.so
+vendor/lib64/librpmb.so
+vendor/lib/libssd.so
+vendor/lib64/libssd.so
+vendor/lib/libsecureui.so
+vendor/lib64/libsecureui.so
+vendor/lib/libqisl.so
+vendor/lib64/libqisl.so
+vendor/lib/libGPreqcancel.so
+vendor/lib64/libGPreqcancel.so
+vendor/lib/libStDrvInt.so
+vendor/lib64/libStDrvInt.so
+vendor/lib/libGPreqcancel_svc.so
+vendor/lib64/libGPreqcancel_svc.so
+vendor/lib/libsecureui_svcsock.so
+vendor/lib64/libsecureui_svcsock.so
+</code></pre>
+<p>除此之外，还需要 <code>qseecomd</code> 及其依赖</p>
+</li>
+</ul>
+<p>在添加完加解密所需的依赖后，还需要在 <code>fstab.qcom</code> 分区表中设置哪些分区可以被加密</p>
+<p>在需要加密的分区的 <code>fs_mgr_flags</code> 字段里添加 flag，可以是如下值</p>
+<ul>
+<li><code>forceencrypt</code> 当前分区未加密，但要求在首次启动后强制加密</li>
+<li><code>encryptable</code> 当前分区未加密，用户可以在设置中手动为其加密</li>
+</ul>
+<h3 id="不装载-data">不装载 /data</h3>
+<blockquote>
+<p>fstab 分区表有误导致</p>
+</blockquote>
+<p>这个问题卡了很久，期间一直没找对关键 Log，记录下自己走的弯路</p>
+<p>表现为设置强制加密 <code>forceencrypt</code> 后，开机 vold 和 qseecomd 均可以启动，但不调用 <code>CryptFS</code> 开始加密 /data，系统也不会继续启动 Zygote</p>
+<p>去除强制加密后，故障依旧，可以挂载 /data，/data 有文件释放，但系统并无进一步动作</p>
+<p>还记得前面分析 [Zygote 启动流程](#Zygote 不启动) 的 init.rc 时，有一个属性叫做 <code>ro.crypto.state</code>，当这个属性被设置时，Zygote 才会启动</p>
+<p>这个属性共有 3 种状态</p>
+<ul>
+<li>unencrypted: <strong>已解密</strong></li>
+<li>unsupported: <strong>不支持加密 (未启用)</strong></li>
+<li>encrypted: <strong>已加密，这里是结合 FBE 使用</strong></li>
+</ul>
+<pre><code># It is recommended to put unnecessary data/ initialization from post-fs-data
+# to start-zygote in device's init.rc to unblock zygote start.
+on zygote-start &#x26;&#x26; property:ro.crypto.state=unencrypted
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+
+on zygote-start &#x26;&#x26; property:ro.crypto.state=unsupported
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+
+on zygote-start &#x26;&#x26; property:ro.crypto.state=encrypted &#x26;&#x26; property:ro.crypto.type=file
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+</code></pre>
+<p>运行 <code>getprop ro.crypto.state</code>，发现现在没有这个属性，那 <code>ro.crypto.state</code> 的值是谁设置的？</p>
+<p>在源码中搜索，发现 <code>/system/core/init/builtins.cpp</code> 中有对这个属性进行 <code>property_set</code></p>
+<p><img alt="image-20240724231922891" loading="lazy" decoding="async" width="876" height="857" src="/_astro/11aebe3869d015ec1a3ded9fa87c7255a5eb7180854c5809e27298e5ffe0eb62.webp" srcset=""></p>
+<p>进入 <code>queue_fs_event()</code> 函数</p>
+<pre><code class="language-cpp">/* Queue event based on fs_mgr return code.
+ *
+ * code: return code of fs_mgr_mount_all
+ *
+ * This function might request a reboot, in which case it will
+ * not return.
+ *
+ * return code is processed based on input code
+ */
+
+static int queue_fs_event(int code) {
+    int ret = code;
+    
+    if (code == FS_MGR_MNTALL_DEV_NEEDS_ENCRYPTION) { // 分区强制加密，但当前未加密 (forceencrypt)
+        ActionManager::GetInstance().QueueEventTrigger("encrypt"); // 触发 encrypt，在 init.*.rc 里，后面会说
+    } else if (code == FS_MGR_MNTALL_DEV_MIGHT_BE_ENCRYPTED) { // 分区可能已经加密，加密类型为 block
+        property_set("ro.crypto.state", "encrypted");
+        property_set("ro.crypto.type", "block");
+        ActionManager::GetInstance().QueueEventTrigger("defaultcrypto"); // 触发 defaultcrypto
+    } else if (code == FS_MGR_MNTALL_DEV_NOT_ENCRYPTED) { // 分区未加密 (encryptable)
+        property_set("ro.crypto.state", "unencrypted");
+        ActionManager::GetInstance().QueueEventTrigger("nonencrypted"); // 触发 nonencrypted
+    } else if (code == FS_MGR_MNTALL_DEV_NOT_ENCRYPTABLE) { // 分区不支持加密
+        property_set("ro.crypto.state", "unsupported");
+        ActionManager::GetInstance().QueueEventTrigger("nonencrypted"); // 触发 nonencrypted
+    } else if (code == FS_MGR_MNTALL_DEV_NEEDS_RECOVERY) {
+        /* Setup a wipe via recovery, and reboot into recovery */
+        PLOG(ERROR) &#x3C;&#x3C; "fs_mgr_mount_all suggested recovery, so wiping data via recovery.";
+        const std::vector&#x3C;std::string> options = {"--wipe_data", "--reason=fs_mgr_mount_all" };
+        reboot_into_recovery(options);
+        return 0;
+        /* If reboot worked, there is no return. */
+    } else if (code == FS_MGR_MNTALL_DEV_FILE_ENCRYPTED) {
+        if (e4crypt_install_keyring()) {
+            return -1;
+        }
+        property_set("ro.crypto.state", "encrypted");
+        property_set("ro.crypto.type", "file");
+
+        // Although encrypted, we have device key, so we do not need to
+        // do anything different from the nonencrypted case.
+        ActionManager::GetInstance().QueueEventTrigger("nonencrypted");
+    } else if (code == FS_MGR_MNTALL_DEV_IS_METADATA_ENCRYPTED) {
+        if (e4crypt_install_keyring()) {
+            return -1;
+        }
+        property_set("ro.crypto.state", "encrypted");
+        property_set("ro.crypto.type", "file");
+
+        // defaultcrypto detects file/block encryption. init flow is same for each.
+        ActionManager::GetInstance().QueueEventTrigger("defaultcrypto");
+    } else if (code == FS_MGR_MNTALL_DEV_NEEDS_METADATA_ENCRYPTION) {
+        if (e4crypt_install_keyring()) {
+            return -1;
+        }
+        property_set("ro.crypto.type", "file");
+
+        // encrypt detects file/block encryption. init flow is same for each.
+        ActionManager::GetInstance().QueueEventTrigger("encrypt");
+    } else if (code > 0) {
+        PLOG(ERROR) &#x3C;&#x3C; "fs_mgr_mount_all returned unexpected error " &#x3C;&#x3C; code;
+    }
+    /* else ... &#x3C; 0: error */
+
+    return ret;
+}
+</code></pre>
+<p>函数通过几个 if 判断来设置 <code>ro.crypto.state</code></p>
+<p>下面是两种常见的情况</p>
+<ul>
+<li>FS_MGR_MNTALL_DEV_NEEDS_ENCRYPTION: <strong>分区强制加密，但当前未加密 (fs_mgr_tag 含有 forceencrypt)</strong></li>
+<li>FS_MGR_MNTALL_DEV_NOT_ENCRYPTED: <strong>分区未加密 (fs_mgr_tag 含有 encryptable)</strong></li>
+</ul>
+<p>显然，当我们配置强制加密的时候，需要得到的返回值是 FS_MGR_MNTALL_DEV_NEEDS_ENCRYPTION</p>
+<p>如果不加密，则是 FS_MGR_MNTALL_DEV_NOT_ENCRYPTED</p>
+<p>函数前面的注释写道</p>
+<blockquote>
+<p>return code of fs_mgr_mount_all</p>
+</blockquote>
+<p>即通过 <code>fs_mgr_mount_all()</code> 函数的返回值，来确定 <code>ro.crypto.type</code></p>
+<p>继续跟进 <code>fs_mgr_mount_all()</code> 函数，在 <code>/system/core/fs_mgr/fs_mgr.cpp</code> 中</p>
+<pre><code class="language-cpp">/* When multiple fstab records share the same mount_point, it will
+ * try to mount each one in turn, and ignore any duplicates after a
+ * first successful mount.
+ * Returns -1 on error, and  FS_MGR_MNTALL_* otherwise.
+ */
+int fs_mgr_mount_all(struct fstab *fstab, int mount_mode)
+{
+    int i = 0;
+    int encryptable = FS_MGR_MNTALL_DEV_NOT_ENCRYPTABLE;
+    int error_count = 0;
+    int mret = -1;
+    int mount_errno = 0;
+    int attempted_idx = -1;
+    FsManagerAvbUniquePtr avb_handle(nullptr);
+
+    if (!fstab) {
+        return FS_MGR_MNTALL_FAIL;
+    }
+    
+...
+
+}
+</code></pre>
+<p>比较长，就不全截进来了，这个函数的作用就是接收传进来的 fstab 条目，并尝试挂载，返回挂载的结果</p>
+<p>在前面的代码中可以分析得知，在启用了强制加密的设备上，我们希望它返回 <code>FS_MGR_MNTALL_DEV_NEEDS_ENCRYPTION</code>，即分区需要加密</p>
+<p>在 <code>/system/core/fs_mgr/fs_mgr.cpp</code> 中搜索 <code>FS_MGR_MNTALL_DEV_NEEDS_ENCRYPTION</code>，有以下结果</p>
+<pre><code class="language-cpp">// Check to see if a mountable volume has encryption requirements
+static int handle_encryptable(const struct fstab_rec* rec)
+{
+    /* If this is block encryptable, need to trigger encryption */
+    if (needs_block_encryption(rec)) {
+        if (umount(rec->mount_point) == 0) {
+            return FS_MGR_MNTALL_DEV_NEEDS_ENCRYPTION;
+        } else {
+            PWARNING &#x3C;&#x3C; "Could not umount " &#x3C;&#x3C; rec->mount_point
+                     &#x3C;&#x3C; " - allow continue unencrypted";
+            return FS_MGR_MNTALL_DEV_NOT_ENCRYPTED;
+        }
+    } else if (should_use_metadata_encryption(rec)) {
+        if (umount(rec->mount_point) == 0) {
+            return FS_MGR_MNTALL_DEV_NEEDS_METADATA_ENCRYPTION;
+        } else {
+            PERROR &#x3C;&#x3C; "Could not umount " &#x3C;&#x3C; rec->mount_point &#x3C;&#x3C; " - fail since can't encrypt";
+            return FS_MGR_MNTALL_FAIL;
+        }
+    } else if (rec->fs_mgr_flags &#x26; (MF_FILEENCRYPTION | MF_FORCEFDEORFBE)) {
+        LINFO &#x3C;&#x3C; rec->mount_point &#x3C;&#x3C; " is file encrypted";
+        return FS_MGR_MNTALL_DEV_FILE_ENCRYPTED;
+    } else if (fs_mgr_is_encryptable(rec)) {
+        return FS_MGR_MNTALL_DEV_NOT_ENCRYPTED;
+    } else {
+        return FS_MGR_MNTALL_DEV_NOT_ENCRYPTABLE;
+    }
+}
+</code></pre>
+<p>这里又调用了 <code>needs_block_encryption()</code> 函数，用于检查当前 fstab 条目是否需要加密</p>
+<pre><code class="language-cpp">static bool needs_block_encryption(const struct fstab_rec* rec)
+{
+    if (device_is_force_encrypted() &#x26;&#x26; fs_mgr_is_encryptable(rec)) return true;
+    if (rec->fs_mgr_flags &#x26; MF_FORCECRYPT) return true;
+    if (rec->fs_mgr_flags &#x26; MF_CRYPT) {
+        /* Check for existence of convert_fde breadcrumb file */
+        char convert_fde_name[PATH_MAX];
+        snprintf(convert_fde_name, sizeof(convert_fde_name),
+                 "%s/misc/vold/convert_fde", rec->mount_point);
+        if (access(convert_fde_name, F_OK) == 0) return true;
+    }
+    if (rec->fs_mgr_flags &#x26; MF_FORCEFDEORFBE) {
+        /* Check for absence of convert_fbe breadcrumb file */
+        char convert_fbe_name[PATH_MAX];
+        snprintf(convert_fbe_name, sizeof(convert_fbe_name),
+                 "%s/convert_fbe", rec->mount_point);
+        if (access(convert_fbe_name, F_OK) != 0) return true;
+    }
+    return false;
+}
+
+int fs_mgr_is_encryptable(const struct fstab_rec *fstab)
+{
+    return fstab->fs_mgr_flags &#x26; (MF_CRYPT | MF_FORCECRYPT | MF_FORCEFDEORFBE);
+}
+</code></pre>
+<p><code>fs_mgr_is_encryptable()</code> 函数很简单，放在一起分析</p>
+<p>如果 fstab 条目的 <code>fs_mgr_flags</code> 字段含有 <code>MF_CRYPT</code>、<code>MF_FORCECRYPT</code>、<code>MF_FORCEFDEORFBE</code> 时，就会触发强制加密</p>
+<p>这几个常量的值定义在 <code>/system/core/fs_mgr/fs_mgr_fstab.cpp</code></p>
+<pre><code class="language-cpp">static struct flag_list fs_mgr_flags[] = {
+    ...
+    {"encryptable=", MF_CRYPT},
+    {"forceencrypt=", MF_FORCECRYPT},
+    {"fileencryption=", MF_FILEENCRYPTION},
+    {"forcefdeorfbe=", MF_FORCEFDEORFBE},
+    ...
+};
+</code></pre>
+<p>检查了我的 fstab，发现 /data 确实配置了 <code>forceencrypt=footer</code>，为什么无法触发加密？</p>
+<pre><code>/dev/block/bootdevice/by-name/userdata    /data    ext4    nosuid,nodev,noatime,barrier=1,noauto_da_alloc,errors=panic    wait,check,formattable,forceencrypt=footer,quota
+</code></pre>
+<p>于是，在 <code>queue_fs_event()</code> 里插了一句 Log，输出返回的 <code>code</code> 值，看看到底返回了什么</p>
+<p><img alt="aaa4082c9bc68c9c53e593e81d7c312d" loading="lazy" decoding="async" width="1183" height="332" src="/_astro/f75310dfdda0f8f5a71e501971c9715df38930c700e5b4f2f80d54890c69b1da.webp" srcset=""></p>
+<p>返回值居然是 <code>No such file or dicretory</code>。不过确实一直没有关注到 <code>fs_mgr_mount_all</code> 的报错，加了自己的 Log 语句才看出来</p>
+<p>一开始以为是找不到 fstab 文件才报的错，于是给 fstab 搬了好几个地方</p>
+<p>后来才发现，这是因为找不到 fstab 内的某个分区才报的这个错。想起在 <a href="#%E6%8F%90%E5%89%8D%E8%A3%85%E8%BD%BD%E5%88%86%E5%8C%BA">提取原机 fstab</a> 的时候，发现并没有 <code>/system</code>、<code>/vendor</code>、<code>/boot</code>、<code>/recovery</code> 分区，于是在 fstab 里删掉了这 4 个分区，用 <code>adb push</code> 回去，系统成功启动，并可以自动加密</p>
+<h3 id="打包-ota-时-fstab-报错">打包 OTA 时 fstab 报错</h3>
+<blockquote>
+<p>fstab 分区表有误导致</p>
+</blockquote>
+<p>参考 <a href="https://github.com/lenovo-sparrow-dev/android_device_lenovo_sparrow/commit/f72c18050a3e499c5c6e06541b50d652972bcb90">commit</a></p>
+<p>前面提到了 <a href="#%E6%8F%90%E5%89%8D%E8%A3%85%E8%BD%BD%E5%88%86%E5%8C%BA">“提前装载分区”</a>，使用了提前装载分区的设备在 <code>/vendor/etc/fstab.qcom</code> 里不需要有 <code>/system</code>、<code>/vendor</code>、<code>/recovery</code>、<code>/boot</code> 条目，直接添加反而会触发 [报错](#不装载 /data)</p>
+<p>但是直接在 rootdir/fstab.qcom 里删除以上 4 个分区，在 <code>brunch</code> 或者 <code>make otapackage</code> 的时候会报错 KeyError，找不到这 4 个分区</p>
+<p>正确做法是，单独给 OTA 时的 Recovery 准备一份 recovery.fstab，里面添加 4 个分区，而系统使用的 fstab 内删除</p>
+<pre><code class="language-diff">diff --git a/BoardConfig.mk b/BoardConfig.mk
+index be67df5e..c001ae2b 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -147,7 +147,7 @@ TARGET_USES_INTERACTION_BOOST := true
+ BOARD_USES_QCOM_HARDWARE := true
+ 
+ # Recovery
+-TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/fstab.qcom
++TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/recovery.fstab
+ 
+ # RIL
+ TARGET_PROVIDES_QTI_TELEPHONY_JAR := true
+</code></pre>
+<pre><code class="language-diff">diff --git a/rootdir/recovery.fstab b/rootdir/recovery.fstab
+new file mode 100644
+index 00000000..4b7ea59f
+--- /dev/null
++++ b/rootdir/recovery.fstab
+@@ -0,0 +1,15 @@
++# Android fstab file.
++# The filesystem that contains the filesystem checker binary (typically /system) cannot
++# specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
++
++/dev/block/bootdevice/by-name/system        /system      ext4    ro,barrier=1,discard                        wait
++/dev/block/bootdevice/by-name/vendor        /vendor      ext4    ro,barrier=1,discard                        wait
++/dev/block/bootdevice/by-name/boot          /boot        emmc    defaults                                    defaults
++/dev/block/bootdevice/by-name/recovery      /recovery    emmc    defaults                                    defaults
++
++/dev/block/bootdevice/by-name/userdata      /data        ext4    noatime,nosuid,nodev,barrier=1,noauto_da_alloc,discard  wait,forceencrypt=footer,quota
++/dev/block/bootdevice/by-name/config        /frp         emmc    defaults                                    defaults
++/dev/block/bootdevice/by-name/misc          /misc        emmc    defaults                                    defaults
++/dev/block/bootdevice/by-name/cache         /cache       ext4    noatime,nosuid,nodev,barrier=1              wait
++/dev/block/bootdevice/by-name/modem         /firmware    vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337,context=u:object_r:firmware_file:s0 wait
++/dev/block/bootdevice/by-name/dsp           /dsp         ext4    ro,nosuid,nodev,barrier=1                   wait
+\ No newline at end of file
+</code></pre>
+<h3 id="selinux-avc">SELinux avc</h3>
+<blockquote>
+<p>权限配置不够全面导致</p>
+</blockquote>
+<p>开机之后依旧无法加密 /data，并很快重启，有两个很明显的 SELinux avc 报错</p>
+<pre><code>Could not load libQSEEComAPI.so
+
+enabling encryption after framework is shutdown, no data changed, restarting system
+
+avc: denied { execute } for path="/vendor/lib64/libQSEEComAPI.so" dev="mmcblk0p45" ino=128 scontext=u:r:vold:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=0
+
+avc: denied { execute } for path="/vendor/lib64/libQSEEComAPI.so" dev="mmcblk0p45" ino=128 scontext=u:r:vold:s0 tcontext=u:object_r:vendor_file:s0 tclass=file permissive=0
+</code></pre>
+<p>SELinux 报错的格式如下</p>
+<blockquote>
+<p>denied {<strong>权限的名称</strong>}  for path=“<strong>文件路径</strong>” dev=“mmcblk0p45” ino=128 scontext=u:r:<strong>触发 SELiunx 的进程名称</strong>:s0 tcontext=u:object_r:<strong>该进程对什么组的文件缺少权限</strong> tclass=<strong>文件类型</strong> permissive=0</p>
+</blockquote>
+<p>按照这个格式，对报错进行分析</p>
+<ul>
+<li>进程 <strong>vold</strong> 缺少对 <strong>vendor_file</strong> 组下的文件 <strong>/vendor/lib64/libQSEEComAPI.so</strong> 的 <strong>execute</strong> 权限</li>
+</ul>
+<p>知道谁对谁缺少什么权限后，在 device 下 sepolicy 目录新建 vold.te</p>
+<pre><code>allow vold vendor_file:file { getattr open read execute };
+</code></pre>
+<p>这样就添加好了 SELinux 权限</p>
+<p>通过命令 <code>mmma system/sepolicy/</code> 单独编译 SELinux，然后 <code>make otapackage</code> 或者单独打包 system 和 vendor 即可生效</p>  </div> </article> </div> <div class="col-mb-12 col-offset-1 col-3 kit-hidden-tb" id="secondary" role="complementary" data-astro-cid-ssfzsv2f> <section class="widget toc-widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>目录</h3> <ul class="widget-list toc-list" data-astro-cid-ssfzsv2f> <li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-0" data-heading-index="0" data-astro-cid-ssfzsv2f> 软硬件要求 </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-1" data-heading-index="1" data-astro-cid-ssfzsv2f> 准备内核源码 </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-2" data-heading-index="2" data-astro-cid-ssfzsv2f> 适配 device </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-3" data-heading-index="3" data-astro-cid-ssfzsv2f> Where are guides so I can port LineageOS to my unsupported device? </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-4" data-heading-index="4" data-astro-cid-ssfzsv2f> 提取 vendor proprrietary </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-5" data-heading-index="5" data-astro-cid-ssfzsv2f> 修改 device </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-6" data-heading-index="6" data-astro-cid-ssfzsv2f> 开始编译 </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-7" data-heading-index="7" data-astro-cid-ssfzsv2f> 报错 </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-8" data-heading-index="8" data-astro-cid-ssfzsv2f> Zygote 不启动 </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-9" data-heading-index="9" data-astro-cid-ssfzsv2f> 提前装载分区 </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-10" data-heading-index="10" data-astro-cid-ssfzsv2f> Data 加解密 </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-11" data-heading-index="11" data-astro-cid-ssfzsv2f> 不装载 /data </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-12" data-heading-index="12" data-astro-cid-ssfzsv2f> 打包 OTA 时 fstab 报错 </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-13" data-heading-index="13" data-astro-cid-ssfzsv2f> SELinux avc </a> </li> </ul> </section> <section class="widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>最新文章</h3> <ul class="widget-list" data-astro-cid-ssfzsv2f> <li data-astro-cid-ssfzsv2f><a href="/posts/2026-summer-travel-shenzhen-hongkong" data-astro-cid-ssfzsv2f>2026 夏深圳和香港游记</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/my-recent-purchases" data-astro-cid-ssfzsv2f>最近买的一些东西</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/drone-rc-ota-package-reverse" data-astro-cid-ssfzsv2f>某无人机遥控器升级包逆向和解密</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/matebook-e-go-2023-and-windows-on-arm-review" data-astro-cid-ssfzsv2f>Matebook E Go 2023 和 WOA 体验</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/hardware-reverse-engineering" data-astro-cid-ssfzsv2f>硬件逆向工程入门</a></li> </ul> </section> <section class="widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>分类</h3> <ul class="widget-list" data-astro-cid-ssfzsv2f> <li data-astro-cid-ssfzsv2f><a href="/category/默认分类" data-astro-cid-ssfzsv2f>默认分类</a></li><li data-astro-cid-ssfzsv2f><a href="/category/信息安全" data-astro-cid-ssfzsv2f>信息安全</a></li><li data-astro-cid-ssfzsv2f><a href="/category/Android" data-astro-cid-ssfzsv2f>Android</a></li> </ul> </section> </div>  <script type="module">function d(){const r=document.querySelectorAll(".toc-list a"),s=document.querySelectorAll(".post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6");if(s.length===0||(s.forEach((e,o)=>{const t=e.tagName.substring(1);e.classList.add(`toc-${t}`),e.setAttribute("id",`toc-${o}`)}),r.length===0))return;let u="",i=!1,c=null;function a(e,o=!1){if(!e||i&&!o)return;u=e;let t=null;if(r.forEach(n=>{n.getAttribute("href")?.substring(1)===u?(n.classList.add("active"),t=n):n.classList.remove("active")}),t){const n=document.getElementById("secondary");if(n){const l=t.getBoundingClientRect(),f=n.getBoundingClientRect();(l.top<f.top||l.bottom>f.bottom)&&t.scrollIntoView({behavior:"smooth",block:"nearest"})}}}const g={root:null,rootMargin:"-5% 0px -80% 0px",threshold:[0,1]},b=new IntersectionObserver(e=>{if(i)return;const o=e.filter(t=>t.isIntersecting).sort((t,n)=>t.target.getBoundingClientRect().top-n.target.getBoundingClientRect().top);if(o.length>0){const t=o[0].target.getAttribute("id");t&&a(t)}},g);s.forEach(e=>b.observe(e)),r.forEach(e=>{e.addEventListener("click",o=>{const t=e.getAttribute("href")?.substring(1);t&&(i=!0,c&&clearTimeout(c),a(t,!0),c=window.setTimeout(()=>{i=!1},800))})})}d();document.addEventListener("astro:after-swap",d);</script>  </div> </div> </div> <footer id="footer" role="contentinfo"> <!-- Fancybox --> <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@latest/dist/fancybox/fancybox.umd.js"></script> <script>
+        function initFancybox() {
+            const postContent = document.querySelector('.post-content');
+            if (postContent) {
+                const imgs = postContent.querySelectorAll('img');
+                imgs.forEach(img => {
+                    // Remove width and height attributes
+                    // img.removeAttribute('width');
+                    // img.removeAttribute('height');
+
+                    // Wrap image with anchor tag for Fancybox if not already wrapped
+                    if (!img.parentElement.closest('a')) {
+                        const anchor = document.createElement('a');
+                        anchor.href = img.src;
+                        anchor.dataset.fancybox = 'gallery';
+                        anchor.dataset.caption = img.alt || '';
+                        
+                        img.parentNode.insertBefore(anchor, img);
+                        anchor.appendChild(img);
+                    }
+                });
+            }
+
+            if (typeof Fancybox !== 'undefined') {
+                Fancybox.bind("[data-fancybox]", {
+                    groupAll: true
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initFancybox);
+        document.addEventListener("astro:page-load", initFancybox);
+    </script> <!-- Prism --> <script src="/prism/prism.js"></script> <script>
+        document.addEventListener("astro:page-load", () => {
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+&copy; 2026 <a href="/">azwhikaru&#39;s Lab</a>.
+    Chant 由 <a href="https://astro.build" target="_blank">Astro</a> 驱动.
+</footer> </body></html>

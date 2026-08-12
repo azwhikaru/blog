@@ -1,0 +1,505 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Hackergame 2024 部分 WriteUp</title><meta name="description" content="勤能补拙，熟能生巧"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@latest/dist/fancybox/fancybox.css"><link rel="stylesheet" href="/prism/prism.css"><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Sidebar.DS-lAe7u.css"></head> <body> <header id="header" class="clearfix"> <div class="container"> <div class="row"> <div class="site-name col-mb-12 col-9"> <a id="logo" href="/">azwhikaru&#39;s Lab</a>
+                    <p class="description">勤能补拙，熟能生巧</p> </div> <div class="site-search col-3 kit-hidden-tb"> <form id="search" method="get" action="/search" role="search"> <label for="s" class="sr-only">搜索关键字</label> <input type="text" id="s" name="q" class="text" placeholder="输入关键字搜索"> <button type="submit" class="submit">搜索</button> </form> </div> <div class="col-mb-12"> <nav id="nav-menu" class="clearfix" role="navigation"> <a class href="/">首页</a><a class href="/about">关于</a> </nav> </div> </div> </div> </header> <div id="body"> <div class="container"> <div class="row">  <div class="col-mb-12 col-8" id="main" role="main"> <article class="post" itemscope itemtype="http://schema.org/BlogPosting"> <h1 class="post-title" itemprop="name headline"> Hackergame 2024 部分 WriteUp </h1> <ul class="post-meta"> <li> <i class="fa-regular fa-clock"></i> <time datetime="2024-11-13T00:00:00.000Z" itemprop="datePublished"> 2024-11-13 </time> </li> <li> <i class="fa-regular fa-folder"></i> <a href="/category/信息安全">信息安全</a> </li> </ul> <div class="post-content" itemprop="articleBody">  <h2 id="01-签到-web">01. 签到 (Web)</h2>
+<blockquote>
+<p>让我们说……各种语言，开始今年的冒险！</p>
+</blockquote>
+<p>打开网页，要求 60 秒内输入 12 种不同语言的启动</p>
+<p><img alt="image-20241104115308544" loading="lazy" decoding="async" width="931" height="866" src="/_astro/e7a805ebbfc39c8f6d073f77b583eba18c8375f76c74e7cdf71d902693c3a290.webp" srcset=""></p>
+<p>什么都不写，直接点提交后，URL 跳转到</p>
+<pre><code>http://202.38.93.141:12024/?pass=false
+</code></pre>
+<p>把 <code>pass</code> 字段直接改成 true，获得 flag</p>
+<p><img alt="image-20241104115430854" loading="lazy" decoding="async" width="717" height="381" src="/_astro/f0f41bed7e67219e329f663a76003fb44e8066e3f03e41a7b065eca57ccf7b9b.webp" srcset=""></p>
+<h2 id="02-喜欢做签到的-ctfer-你们好呀-web">02. 喜欢做签到的 CTFer 你们好呀 (Web)</h2>
+<blockquote>
+<p>喜欢做签到的 CTFer 你们好呀，我是一道更 <strong>典型</strong> 的 checkin：有两个 flag 就藏在中国科学技术大学校内 CTF 战队的招新主页里！</p>
+</blockquote>
+<p>没有给地址，所以要自己去找 “中国科学技术大学校内 CTF 战队的招新主页”</p>
+<p>在首页 (<a href="https://hack.lug.ustc.edu.cn/">https://hack.lug.ustc.edu.cn/</a>) 的承办单位中找到了战队名称及主页 (<a href="https://www.nebuu.la/">https://www.nebuu.la/</a>)</p>
+<p><img alt="image-20241104115707277" loading="lazy" decoding="async" width="611" height="227" src="/_astro/569264994c20de08679585205c8343c5de5dd44a456c5d03c9b2ceb59199d40c.webp" srcset=""></p>
+<p>进入网站后，有一个类似终端的页面</p>
+<p><img alt="image-20241104115748441" loading="lazy" decoding="async" width="875" height="515" src="/_astro/7edcf792a421b4c4e21095ab6fff6f2cce2b0e9fcce3f4e5f3e2da62a58850c3.webp" srcset=""></p>
+<p>没有特别明显的线索，慢慢摸索</p>
+<p>一个 flag 用 <code>ls -al</code> 命令查看，是一个隐藏文件 <code>.flag</code></p>
+<p><img alt="image-20241104120033790" loading="lazy" decoding="async" width="1383" height="293" src="/_astro/3ed2c1a866c060065d498306276379e68c46f6e3b42f66a0477ffc5d29080fcb.webp" srcset=""></p>
+<p>还有一个 flag 在 <code>env</code> 命令中，是一个环境变量</p>
+<p><img alt="image-20241104120149216" loading="lazy" decoding="async" width="1103" height="215" src="/_astro/5c0fe923720e137f632a88a652d21bc34f3a73b2ee1abf6c562b44f9dddb08ac.webp" srcset=""></p>
+<h2 id="03-猫咪问答hackergame-十周年纪念版general">03. 猫咪问答（Hackergame 十周年纪念版）(General)</h2>
+<blockquote>
+<p>多年回答猫咪问答的猫咪大多目光锐利，极度自信，且智力逐年增加，最后完全变成猫咪问答高手。回答猫咪问答会优化身体结构，突破各种猫咪极限。猫咪一旦开始回答猫咪问答，就说明这只猫咪的智慧品行样貌通通都是上等，这辈子注定在猫咪界大有作为。</p>
+</blockquote>
+<h3 id="01-在-hackergame-2015-比赛开始前一天晚上开展的赛前讲座是在哪个教室举行的">01. 在 Hackergame 2015 比赛开始前一天晚上开展的赛前讲座是在哪个教室举行的？</h3>
+<blockquote>
+<p>提示：填写教室编号，如 5207、3A101。</p>
+</blockquote>
+<p>2015 年举办的是第 2 届 Hackergame。不需要用到 Wayback Machine，官网就有存档 (<a href="https://lug.ustc.edu.cn/wiki/sec/contest.html">https://lug.ustc.edu.cn/wiki/sec/contest.html</a>)</p>
+<p><img alt="image-20241104205914875" loading="lazy" decoding="async" width="530" height="462" src="/_astro/19477b59fcc44af5d6c021e7e03230dee08d6c6be54b24165568882401af7d6a.webp" srcset=""></p>
+<p>在比赛时间安排中可以看到比赛前一天的讲座</p>
+<p><img alt="image-20241104205954673" loading="lazy" decoding="async" width="874" height="324" src="/_astro/84ea1e2a8eaa64453174db95a568f9511f2933497c590b305cb58654eede773d.webp" srcset=""></p>
+<p>答案是 <strong>3A204</strong></p>
+<h3 id="02-众所周知hackergame-共约-25-道题目近五年不含今年举办的-hackergame-中题目数量最接近这个数字的那一届比赛里有多少人注册参加">02. 众所周知，Hackergame 共约 25 道题目。近五年（不含今年）举办的 Hackergame 中，题目数量最接近这个数字的那一届比赛里有多少人注册参加？</h3>
+<blockquote>
+<p>提示：是一个非负整数。</p>
+</blockquote>
+<p>往年的题目数量看看往年的题解</p>
+<p>近 5 年但不含今年，也就是 2019 - 2023</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="center">年份</th><th align="center">题目数量</th></tr></thead><tbody><tr><td align="center">2019</td><td align="center">28</td></tr><tr><td align="center">2020</td><td align="center">31</td></tr><tr><td align="center">2021</td><td align="center">31</td></tr><tr><td align="center">2022</td><td align="center">33</td></tr><tr><td align="center">2023</td><td align="center">29</td></tr></tbody></table>
+<p>2019 年最接近 25 题，查看 2019 年的新闻稿 (<a href="https://lug.ustc.edu.cn/news/2019/12/hackergame-2019/">https://lug.ustc.edu.cn/news/2019/12/hackergame-2019/</a>)</p>
+<blockquote>
+<p>经统计，在本次比赛中，总共有 2682 人注册…</p>
+</blockquote>
+<p>答案是 <strong>2682</strong></p>
+<h3 id="03-hackergame-2018-让哪个热门检索词成为了科大图书馆当月热搜第一">03. Hackergame 2018 让哪个热门检索词成为了科大图书馆当月热搜第一？</h3>
+<blockquote>
+<p>提示：仅由中文汉字构成。</p>
+</blockquote>
+<p>查看 2018 年的猫咪问答题解 (<a href="https://github.com/ustclug/hackergame2018-writeups/blob/master/official/ustcquiz/README.md">https://github.com/ustclug/hackergame2018-writeups/blob/master/official/ustcquiz/README.md</a>)</p>
+<p>其中</p>
+<blockquote>
+<ol>
+<li>
+<p>在中国科大图书馆中，有一本书叫做《程序员的自我修养:链接、装载与库》，请问它的索书号是？</p>
+<p>打开 <a href="https://lib.ustc.edu.cn/">中国科大图书馆主页</a>，直接搜索 “程序员的自我修养” 即可。</p>
+</li>
+</ol>
+</blockquote>
+<p>答案是 <strong>程序员的自我修养</strong></p>
+<h3 id="04-在今年的-usenix-security-学术会议上中国科学技术大学发表了一篇关于电子邮件伪造攻击的论文在论文中作者提出了-6-种攻击方法并在多少个电子邮件服务提供商及客户端的组合上进行了实验">04. 在今年的 USENIX Security 学术会议上中国科学技术大学发表了一篇关于电子邮件伪造攻击的论文，在论文中作者提出了 6 种攻击方法，并在多少个电子邮件服务提供商及客户端的组合上进行了实验？</h3>
+<blockquote>
+<p>提示：是一个非负整数。</p>
+</blockquote>
+<p>论文地址是 <a href="https://www.usenix.org/conference/usenixsecurity24/presentation/ma-jinrui">https://www.usenix.org/conference/usenixsecurity24/presentation/ma-jinrui</a></p>
+<p>下载 PDF，懒得看，丢给 AI 分析</p>
+<blockquote>
+<p>在论文中作者提出了 6 种攻击方法，并在多少个电子邮件服务提供商及客户端的组合上进行了实验？答案是一个非负整数</p>
+</blockquote>
+<p>电子邮件服务提供商数量：16</p>
+<p>客户端数量：20</p>
+<p>组合数量：336</p>
+<p>答案是 <strong>336</strong></p>
+<h3 id="05-10-月-18-日-greg-kroah-hartman-向-linux-邮件列表提交的一个-patch-把大量开发者从-maintainers-文件中移除这个-patch-被合并进-linux-mainline-的-commit-id-是多少">05. 10 月 18 日 Greg Kroah-Hartman 向 Linux 邮件列表提交的一个 patch 把大量开发者从 MAINTAINERS 文件中移除。这个 patch 被合并进 Linux mainline 的 commit id 是多少？</h3>
+<blockquote>
+<p>提示：id 前 6 位，字母小写，如 c1e939。</p>
+</blockquote>
+<p>前段时间比较热门的话题，因此很好找</p>
+<p>进入 Linux 的 Github 仓库 (<a href="https://github.com/torvalds/linux/">https://github.com/torvalds/linux/</a>)</p>
+<p>在 commits 中搜索 Greg</p>
+<p><img alt="image-20241104121801821" loading="lazy" decoding="async" width="411" height="257" src="/_astro/e69b1054c1487adcae6f4a60d374325e645449c5dcf224a3a90691f99b392677.webp" srcset=""></p>
+<p>找到这个典中典的 commit</p>
+<p><img alt="image-20241104121821678" loading="lazy" decoding="async" width="1632" height="703" src="/_astro/068671332438894269f4e035d33df7ee9c32234da618fb1a52872b796f1f77c4.webp" srcset=""></p>
+<p>ID 为 6e90b675cf942e50c70e8394dfb5862975c3b3b2，前 6 位是 6e90b6</p>
+<p>答案是 <strong>6e90b6</strong></p>
+<h3 id="06-大语言模型会把输入分解为一个一个的-token-后继续计算请问这个网页的-html-源代码会被-meta-的-llama-3-70b-模型的-tokenizer-分解为多少个-token">06. 大语言模型会把输入分解为一个一个的 token 后继续计算，请问这个网页的 HTML 源代码会被 Meta 的 Llama 3 70B 模型的 tokenizer 分解为多少个 token？</h3>
+<blockquote>
+<p>提示：首次打开本页时的 HTML 源代码，答案是一个非负整数。</p>
+</blockquote>
+<p>Google 搜索 <strong>Try Llama3 tokenizer online</strong>，找到一个在线 playground (<a href="https://belladoreai.github.io/llama3-tokenizer-js/example-demo/build/">https://belladoreai.github.io/llama3-tokenizer-js/example-demo/build/</a>)</p>
+<p>把 HTML 源码粘贴进去，得到 token 数</p>
+<p><img alt="image-20241104211537041" loading="lazy" decoding="async" width="743" height="878" src="/_astro/9b5586e8989a6548acf98fd210677afc914efb90ff1124cc7537a290930c1cfe.webp" srcset=""></p>
+<p>答案是 <strong>1833</strong></p>
+<p><img alt="image-20241104211623409" loading="lazy" decoding="async" width="790" height="295" src="/_astro/8444bd2b987cb4069a92a13f37da6b849eef603e70d9c572890c238ace2d835f.webp" srcset=""></p>
+<h2 id="04-打不开的盒-general">04. 打不开的盒 (General)</h2>
+<blockquote>
+<p>如果一块砖头里塞进了一张写了 flag 的纸条，应该怎么办呢？相信这不是一件困难的事情。</p>
+<p>现在，你遇到了同样的情况：这里有一个密封盒子的设计文件，透过镂空的表面你看到里面有些东西……</p>
+<p>那只要把它 3D 打印出来之后砸开不就解决了？用网上的制造服务的话，可能还没收到东西比赛就结束了，所以难道真的要去买一台 3D 打印机才能够看到里面的东西吗？</p>
+</blockquote>
+<p>下载到一个 STL 模型，用比较简单的 Autodesk Tinkercad (<a href="https://www.tinkercad.com/">https://www.tinkercad.com/</a>) 打开</p>
+<p><img alt="image-20241104122303812" loading="lazy" decoding="async" width="1324" height="725" src="/_astro/f31d0ade28427f217cd4132082a3cfa8e62607f893c82447e49eb9cdb9a0b114.webp" srcset=""></p>
+<p>2 种方式</p>
+<ol>
+<li>把外形设置为透明</li>
+<li>从洞里钻进去</li>
+</ol>
+<p><img alt="image-20241104122409328" loading="lazy" decoding="async" width="699" height="632" src="/_astro/83ac34fbfe0a5b3970e71297f2c65888e3226fe57f99693d8d6b26a5cab6eb20.webp" srcset=""></p>
+<h2 id="05-每日论文太多了-general">05. 每日论文太多了! (General)</h2>
+<blockquote>
+<p>描述太长不放了，大概意思就是看论文，找 flag</p>
+</blockquote>
+<p>论文地址是 <a href="https://dl.acm.org/doi/10.1145/3650212.3652145">https://dl.acm.org/doi/10.1145/3650212.3652145</a></p>
+<p>下载到 PDF 后，用 Foxit 编辑器 (不是查看器) 打开，搜索 flag</p>
+<p><img alt="image-20241104122627242" loading="lazy" decoding="async" width="839" height="534" src="/_astro/f02cccc2e87b7876e4428de7a5602d06bdce9887ab3de99e9623207c2570d05b.webp" srcset=""></p>
+<p>找到一个隐藏的 flag here，用编辑功能把这些文本和形状拖开，找到 flag</p>
+<p><img alt="image-20241104122711374" loading="lazy" decoding="async" width="492" height="421" src="/_astro/6267c9680ad1c2baf1299334467ca48595490dd052951a19e57bfe27f10cfd03.webp" srcset=""></p>
+<h2 id="06-比大小王-web">06. 比大小王 (Web)</h2>
+<blockquote>
+<p>「小孩哥，你干了什么？竟然能一边原崩绝鸣舟，一边农瓦 CSGO。你不去做作业，我等如何排位上分？」</p>
+<p>小孩哥不禁莞尔，淡然道：「很简单，做完口算题，拿下比大小王，家长不就让我玩游戏了？」</p>
+<p>说罢，小孩哥的气息终于不再掩饰，一百道题，十秒速通。</p>
+<p>在这场巅峰对决中，你能否逆风翻盘狙击小孩哥，捍卫我方尊严，成为新一代的「比大小王」？！</p>
+</blockquote>
+<p>类似前段时间比较火的小猿口算。<em>接口也是口，算法也是算</em></p>
+<p><img alt="image-20241104123057071" loading="lazy" decoding="async" width="771" height="707" src="/_astro/4ee3043bf3ce8932c13385f8579e6d2b2764f8073bf796136f6ddfeadd4ee5bc.webp" srcset=""></p>
+<p>经过测试，用模拟点击太慢了，是做不出来的…</p>
+<p>所以瞎写了一个篡改猴脚本，直接拦截请求</p>
+<pre><code class="language-js">// ==UserScript==
+// @name         比大小王 Solver
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  比大小王 Solver
+// @match        http://202.38.93.141:12122/*
+// @run-at       document-start
+// @grant        unsafeWindow
+// ==/UserScript==
+
+(function () {
+    const originFetch = fetch;
+    unsafeWindow.fetch = (path, param) => {
+        console.log('fetch path', path);
+        if (path == '/game') {
+			console.log('fetch game found', path);
+            return originFetch(path, param).then(response => {
+                const clone = response.clone();
+                clone.json().then(data => {
+                    console.log("fetch return:", data);
+
+                    const challengs = data.values;
+                    console.log("challengs:", challengs);
+
+                    const inputs = [];
+
+                    challengs.forEach(pair => {
+                        if (pair[0] > pair[1]) {
+                            inputs.push('>');
+                        } else if (pair[0] &#x3C; pair[1]) {
+                            inputs.push('&#x3C;');
+                        } else {
+                            inputs.push('=');
+                        }
+                    });
+
+                    setTimeout(() => {
+                        originFetch('submit', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({inputs}),
+                        }).then(response => {
+                            const clone = response.clone();
+                            clone.json().then(data => {
+                                console.log('flag:', data);
+                                alert(data.message);
+                            });
+                        });
+                    }, 5000);
+
+                    console.log('solution:', { inputs });
+                }).catch(error => {
+                    console.error("cannot parse fetch data:", error);
+                });
+                return response;
+            });
+        } else {
+            return originFetch(path, param);
+        }
+    }
+})();
+</code></pre>
+<p><img alt="image-20241104123237348" loading="lazy" decoding="async" width="556" height="171" src="/_astro/33554e571ddfb1bcc07d0bf0209c57b34498b9be1473bc8fb25b15184ff8774d.webp" srcset=""></p>
+<h2 id="07-旅行照片-general">07. 旅行照片 (General)</h2>
+<h3 id="01-题目-1-2">01. 题目 1-2</h3>
+<h4 id="问题-1-照片拍摄的位置距离中科大的哪个校门更近格式x校区y门均为一个汉字"><strong>问题 1: 照片拍摄的位置距离中科大的哪个校门更近？（格式：</strong><code>X校区Y门</code><strong>，均为一个汉字）</strong></h4>
+<p>在地图上搜索 “科里科气科创驿站”，有 2 个结果，查看街景确认具体位置</p>
+<p><img alt="image-20241104140159749" loading="lazy" decoding="async" width="880" height="508" src="/_astro/11147a70a9b02389fc233ae8a83f1c0e2d067a5f942961bc4aa08156385ccac8.webp" srcset=""></p>
+<p>离这里最近的校区是东校区，百度地图没有给具体校门，左西右东盲猜西门</p>
+<p>答案是 <strong>东校区西门</strong></p>
+<h4 id="问题-2-话说-leo-酱上次出现在桁架上是科大今年的-acg-音乐会活动日期我没记错的话是格式yyyymmdd"><strong>问题 2: 话说 Leo 酱上次出现在桁架上是……科大今年的 ACG 音乐会？活动日期我没记错的话是？（格式：</strong><code>YYYYMMDD</code><strong>）</strong></h4>
+<p>微博搜索 <strong>中科大leo学生动漫协会</strong> (<a href="https://weibo.com/u/3671005600)%EF%BC%8C%E5%BE%80%E4%B8%8B%E7%BF%BB%E5%8A%A8%E6%80%81">https://weibo.com/u/3671005600)，往下翻动态</a></p>
+<p><img alt="image-20241104140413595" loading="lazy" decoding="async" width="796" height="721" src="/_astro/bb5f8d17b69533bd4bd4bfcbe5660ff97bd6c964a99372940b7444f1f0ba465f.webp" srcset=""></p>
+<p>答案是: <strong>20240519</strong></p>
+<p><img alt="image-20241104140524384" loading="lazy" decoding="async" width="901" height="409" src="/_astro/bac727d94ce46fdace7d07d3270049898e6660ffd0d2f622db481e3c0d990300.webp" srcset=""></p>
+<h3 id="02-题目-3-4">02. 题目 3-4</h3>
+<h4 id="问题-3-这个公园的名称是什么不需要填写公园所在市区等信息"><strong>问题 3: 这个公园的名称是什么？（不需要填写公园所在市区等信息）</strong></h4>
+<p>把图片右侧的垃圾桶放大，可以看到 <strong>六安国科</strong> 字样</p>
+<p><img alt="image-20241104141841515" loading="lazy" decoding="async" width="629" height="577" src="/_astro/847e7a7aea9b9a96234c48753c9425e005868fac7c36dcc5c94732dcdf48d2fc.webp" srcset=""></p>
+<p>猜测位于安徽六安，打开高德搜索一下</p>
+<p><img alt="Screenshot_2024-11-04-14-19-17-33_ca6ee20236ea15ad01663c6ea4ca0bdb" loading="lazy" decoding="async" width="977" height="2147" src="/_astro/7ddd34a2528918db299f025ca94e3a566fad4babefecc364ffef1e8af46b9ecb.webp" srcset=""></p>
+<p>公园特征不太明显，只能先试试了。不过第 1 个就蒙对了，答案是 <strong>中央公园</strong></p>
+<h4 id="问题-4-这个景观所在的景点的名字是三个汉字"><strong>问题 4: 这个景观所在的景点的名字是？（三个汉字）</strong></h4>
+<p>这题用 Google 或者百度识图就能找到</p>
+<p><img alt="image-20241104142717792" loading="lazy" decoding="async" width="916" height="720" src="/_astro/084d34517741fbaef4eb764b2725356781328d06a55cb1c9307442ea6cc3d78e.webp" srcset=""></p>
+<p>答案是 <strong>坛子岭</strong></p>
+<p><img alt="image-20241104142813611" loading="lazy" decoding="async" width="893" height="409" src="/_astro/27e7f6190705f2b5408034712469a8b3ab18cf80ef8bc0216f996637b82c1139.webp" srcset=""></p>
+<h3 id="03-题目-5-6">03. 题目 5-6</h3>
+<h4 id="问题-5-距离拍摄地最近的医院是无需包含院区地名信息格式xxx医院"><strong>问题 5: 距离拍摄地最近的医院是？（无需包含院区、地名信息，格式：XXX医院）</strong></h4>
+<p>图片中间的 2 栋建筑特征比较明显的，直接 Google 就能搜出来</p>
+<p><img alt="image-20241104143950803" loading="lazy" decoding="async" width="221" height="268" src="/_astro/7118893e32f2229a00c60e5c4c300f8c40e96ad346b27f81c8608ae988ba3e40.webp" srcset=""></p>
+<p><img alt="image-20241104144003030" loading="lazy" decoding="async" width="769" height="593" src="/_astro/1404547659f3ef2a808006658b3dfcf0458539f29dbab75744ed7f5cc23d0eed.webp" srcset=""></p>
+<p>一开始以为 <strong>动车所</strong> 是繁体中文的某种表达，后来才知道就叫动车所</p>
+<p><img alt="Screenshot_2024-11-04-14-41-54-73_ca6ee20236ea15ad01663c6ea4ca0bdb" loading="lazy" decoding="async" width="1080" height="1506" src="/_astro/ebd4aed20fd6f5fa4e056805fee1b258a9da1dc9789cdab724dca3d293da5f84.webp" srcset=""></p>
+<p>搜索北京北动车所附近的医院，最近的是 <strong>积水潭医院</strong></p>
+<h4 id="问题-6-左下角的动车组型号是"><strong>问题 6: 左下角的动车组型号是？</strong></h4>
+<p>这里也能用 Google 搜出来</p>
+<p><img alt="image-20241104144441216" loading="lazy" decoding="async" width="1413" height="645" src="/_astro/bc1ecd9530f70c79b264cf91d72be73485287b9ffabc3c352c0a9a87e8ce5fd0.webp" srcset=""></p>
+<p>搜出来的型号是 <strong>CRH6F-A</strong>。特征都可以对上，也确实是四编组动车</p>
+<p><img alt="image-20241104144517367" loading="lazy" decoding="async" width="984" height="653" src="/_astro/2652e0654a20c6bf78b50aa9f36a515dbefd661a944f1061740031356df22934.webp" srcset=""></p>
+<p><img alt="image-20241104144554828" loading="lazy" decoding="async" width="887" height="406" src="/_astro/feba6c81a8026b46c00108d6e4523b251bfe4c865fdbb8fa0742bcb4fba99615.webp" srcset=""></p>
+<h2 id="10-nodejs-is-web-scale-web">10. Node.js is Web Scale (Web)</h2>
+<blockquote>
+<p>小 Q 最近在写 Node.js，需要一个键值数据库来存储数据。</p>
+<p><del>众所周知</del>，其他的数据库无论如何都需要 write to disk，所以它们 don’t scale。直接写到 <code>/dev/null</code> 嘛，虽然性能很好，但是好像就拿不到写入的数据了。基于这个想法，小 Q 利用最新最热的<del>还没跑路的</del>大语言模型，生成了一段内存数据库的 Node.js 代码，绝对 web scale！</p>
+</blockquote>
+<p>并没有用到 MongoDB 或者 Redis 之类的 KV 数据库，只是单纯在内存里存了 Json 对象</p>
+<p>源码中有一段执行命令的接口</p>
+<pre><code class="language-js">// GET /execute - Run commands which are constant and obviously safe.
+app.get("/execute", (req, res) => {
+  const key = req.query.cmd;
+  const cmd = cmds[key];
+  res.setHeader("content-type", "text/plain");
+  res.send(execSync(cmd).toString());
+});
+</code></pre>
+<p>但是这个接口只能执行 <code>cmds</code> 对象里的命令，而 <code>cmds</code> 命令是写死的，肯定没法往里面插入命令了</p>
+<pre><code class="language-js">let cmds = {
+  getsource: "cat server.js",
+  test: "echo 'hello, world!'",
+};
+</code></pre>
+<p>搜索一下，发现有一种 <strong>JavaScript 原型污染</strong> 方式。具体原理懒得复制粘贴了</p>
+<p>总之就是，通过设置 <code>__proto__.XXX</code> 属性，可以让一个对象全局可用</p>
+<p><img alt="image-20241104134121280" loading="lazy" decoding="async" width="1025" height="326" src="/_astro/4064bf7f48e6ca15d0eb283b76b697cfe453ceb819079fce7f1620bb6ad5651d.webp" srcset=""></p>
+<p>设置完后，执行刚才插入的 <code>shell</code> 命令</p>
+<pre><code>https://XXX.hack-challenge.lug.ustc.edu.cn:8443/execute?cmd=shell
+</code></pre>
+<p><img alt="image-20241104134255691" loading="lazy" decoding="async" width="556" height="46" src="/_astro/73e904d5902a8ed2625cb8fb4db1c2c5f8243ca699b50abb8a5f3e493fdb710e.webp" srcset=""></p>
+<h2 id="11-paolugpt-web">11. PaoluGPT (Web)</h2>
+<blockquote>
+<p>在大语言模型时代，几乎每个人都在和大语言模型聊天。小 Q 也想找一个方便使用的 GPT 服务，所以在熟人推荐下，他注册了某个 GPT 服务，并且付了几块钱。只是出乎小 Q 意料的是，他才用了几天，服务商就跑路了！跑路的同时，服务商还公开了一些用户的聊天记录。小 Q 看着这些聊天记录，突然发现里面好像有 flag……</p>
+</blockquote>
+<p>进入页面，看到一堆聊天记录</p>
+<p><img alt="image-20241104125029215" loading="lazy" decoding="async" width="1488" height="875" src="/_astro/447bffb8ac239e181883e963dadca7fc0518521fa70ca3061299a42cb6c83bcd.webp" srcset=""></p>
+<p>随便写个脚本，遍历一下就出 flag 了 (脚本没保存，有空再贴)</p>
+<p>第二个 flag 肯定不在网页里了，题目提供了后端源码</p>
+<pre><code class="language-python">@app.route("/list")
+def list():
+    results = execute_query("select id, title from messages where shown = true", fetch_all=True)
+    messages = [Message(m[0], m[1], None) for m in results]
+    return render_template("list.html", messages=messages)
+
+@app.route("/view")
+def view():
+    conversation_id = request.args.get("conversation_id")
+    results = execute_query(f"select title, contents from messages where id = '{conversation_id}'")
+    return render_template("view.html", message=Message(None, results[0], results[1]))
+</code></pre>
+<pre><code class="language-python">import sqlite3
+
+def execute_query(s: str, fetch_all: bool = False):
+    conn = sqlite3.connect("file:/tmp/data.db?mode=ro", uri=True)
+    cur = conn.cursor()
+    res = cur.execute(s)
+    if fetch_all:
+        return res.fetchall()
+    else:
+        return res.fetchone()
+</code></pre>
+<p>有 2 个 SQL 查询相关方法，看来是 SQL 注入了</p>
+<p>第 1 个 查询没有注入点，注入点应该在第 2 个查询的 <code>conversation_id</code></p>
+<p>跑一下 Sqlmap</p>
+<pre><code>sqlmap --cookie "session=***" --url https://***.hack-challenge.lug.ustc.edu.cn:8443/view?conversation_id= --level=3 --risk=3 --batch --dump
+</code></pre>
+<p>会将 <code>messages</code> 表的数据转储到 CSV 文件，第 1 个和第 2 个隐藏的 flag 都在里面</p>
+<p><img alt="image-20241104125608943" loading="lazy" decoding="async" width="713" height="123" src="/_astro/62476d0428fb591641dbabe3e61f8b71c00e26bad953e233889f6b987fd288c3.webp" srcset=""></p>
+<p>不过，如果一开始就用 SQL 注入做，就能一把梭了</p>
+<h2 id="12-强大的正则表达式-math">12. 强大的正则表达式 (math)</h2>
+<p>暂无</p>
+<h2 id="13-惜字如金-30-math">13. 惜字如金 3.0 (math)</h2>
+<blockquote>
+<p>惜字如金化指的是将一串文本中的部分字符删除，从而形成另一串文本的过程。该标准针对的是文本中所有由 52 个拉丁字母连续排布形成的序列，在下文中统称为「单词」。一个单词中除「<code>AEIOUaeiou</code>」外的 42 个字母被称作「辅音字母」。整个惜字如金化的过程按照以下两条原则对文本中的每个单词进行操作：</p>
+<ul>
+<li>第一原则（又称 creat 原则）：如单词最后一个字母为「<code>e</code>」或「<code>E</code>」，且该字母的上一个字母为辅音字母，则该字母予以删除。</li>
+<li>第二原则（又称 referer 原则）：如单词中存在一串全部由完全相同（忽略大小写）的辅音字母组成的子串，则该子串仅保留第一个字母。</li>
+</ul>
+<p>容易证明惜字如金化操作是幂等的：多次惜字如金化和一次惜字如金化的结果是相同的。</p>
+</blockquote>
+<h3 id="01-题目-a">01. 题目 A</h3>
+<p>第 1 题不涉及什么 Key，用 VSCode 打开，照着报错改就行了</p>
+<pre><code class="language-diff">diff --git "a/.\\answer_a.py" "b/.\\answer_a_fixed.py"
+index ac4e031..c05e611 100644
+--- "a/.\\answer_a.py"
++++ "b/.\\answer_a_fixed.py"
+@@ -1,78 +1,78 @@
+ #!/usr/bin/python3                                                              
+                                                                                 
+-import atexit, bas64, flask, itertools, os, r                                 
++import atexit, base64, flask, itertools, os, re                                 
+                                                                                 
+                                                                                 
+ def crc(input: bytes) -> int:                                                   
+     poly, poly_degree = 'AaaaaaAaaaAAaaaaAAAAaaaAAAaAaAAAAaAAAaaAaaAaaAaaA', 48 
+-    asert len(poly) == poly_degree + 1 and poly[0] == poly[poly_degree] == 'A' 
+-    flip = sum(['a', 'A'].index(poly[i + 1]) &#x3C;&#x3C; i for i in rang(poly_degree))  
++    assert len(poly) == poly_degree + 1 and poly[0] == poly[poly_degree] == 'A' 
++    flip = sum(['a', 'A'].index(poly[i + 1]) &#x3C;&#x3C; i for i in range(poly_degree))  
+     digest = (1 &#x3C;&#x3C; poly_degree) - 1                                             
+     for b in input:                                                             
+         digest = digest ^ b                                                     
+-        for _ in rang(8):                                                      
+-            digest = (digest >> 1) ^ (flip if digest &#x26; 1 == 1 els 0)           
++        for _ in range(8):                                                      
++            digest = (digest >> 1) ^ (flip if digest &#x26; 1 == 1 else 0)           
+     return digest ^ (1 &#x3C;&#x3C; poly_degree) - 1                                      
+                                                                                 
+                                                                                 
+ def hash(input: bytes) -> bytes:                                                
+     digest = crc(input)                                                         
+     u2, u1, u0 = 0xCb4EcdfD0A9F, 0xa9dec1C1b7A3, 0x60c4B0aAB4Bf                 
+-    asert (u2, u1, u0) == (223539323800223, 186774198532003, 106397893833919)  
++    assert (u2, u1, u0) == (223539323800223, 186774198532003, 106397893833919)  
+     digest = (digest * (digest * u2 + u1) + u0) % (1 &#x3C;&#x3C; 48)                     
+-    return digest.to_bytes(48 // 8, 'litl')                                   
++    return digest.to_bytes(48 // 8, 'little')                                   
+                                                                                 
+                                                                                 
+ def xzrj(input: bytes) -> bytes:                                                
+     pat, repl = rb'([B-DF-HJ-NP-TV-Z])\1*(E(?![A-Z]))?', rb'\1'                 
+-    return r.sub(pat, repl, input, flags=r.IGNORECAS)                        
++    return re.sub(pat, repl, input, flags=re.IGNORECASE)                        
+                                                                                 
+                                                                                 
+ paths: list[bytes] = []                                                         
+                                                                                 
+ xzrj_bytes: bytes = bytes()                                                     
+                                                                                 
+-with open(__fil__, 'rb') as f:                                                 
++with open(__file__, 'rb') as f:                                                 
+     for row in f.read().splitlines():                                           
+         row = (row.rstrip() + b' ' * 80)[:80]                                   
+-        path = bas64.b85encod(hash(row)) + b'.txt'                            
++        path = base64.b85encode(hash(row)) + b'.txt'                            
+         with open(path, 'wb') as pf:                                            
+-            pf.writ(row)                                                       
+-            paths.apend(path)                                                  
++            pf.write(row)                                                       
++            paths.append(path)                                                  
+             xzrj_bytes += xzrj(row) + b'\r\n'                                   
+                                                                                 
+     def clean():                                                                
+         for path in paths:                                                      
+             try:                                                                
+-                os.remov(path)                                                 
+-            except FileNotFoundEror:                                           
+-                pas                                                            
++                os.remove(path)                                                 
++            except FileNotFoundError:                                           
++                pass                                                            
+                                                                                 
+     atexit.register(clean)                                                      
+                                                                                 
+                                                                                 
+-bp: flask.Blueprint = flask.Blueprint('answer_a', __nam__)                     
++bp: flask.Blueprint = flask.Blueprint('answer_a', __name__)                     
+                                                                                 
+                                                                                 
+ @bp.get('/answer_a.py')                                                         
+-def get() -> flask.Respons:                                                    
+-    return flask.Respons(xzrj_bytes, content_typ='text/plain; charset=UTF-8') 
++def get() -> flask.Response:                                                    
++    return flask.Response(xzrj_bytes, content_type='text/plain; charset=UTF-8') 
+                                                                                 
+                                                                                 
+ @bp.post('/answer_a.py')                                                        
+-def post() -> flask.Respons:                                                   
++def post() -> flask.Response:                                                   
+     wrong_hints = {}                                                            
+     req_lines = flask.request.get_data().splitlines()                           
+-    iter = enumerat(itertools.zip_longest(paths, req_lines), start=1)          
++    iter = enumerate(itertools.zip_longest(paths, req_lines), start=1)          
+     for index, (path, req_row) in iter:                                         
+-        if path is Non:                                                        
++        if path is None:                                                        
+             wrong_hints[index] = 'Too many lines for request data'              
+             break                                                               
+-        if req_row is Non:                                                     
++        if req_row is None:                                                     
+             wrong_hints[index] = 'Too few lines for request data'               
+             continue                                                            
+         req_row_hash = hash(req_row)                                            
+-        req_row_path = bas64.b85encod(req_row_hash) + b'.txt'                 
++        req_row_path = base64.b85encode(req_row_hash) + b'.txt'                 
+         if not os.path.exists(req_row_path):                                    
+             wrong_hints[index] = f'Unmatched hash ({req_row_hash.hex()})'       
+             continue                                                            
+@@ -91,7 +91,7 @@ def post() -> flask.Respons:
+     if wrong_hints:                                                             
+         return {'wrong_hints': wrong_hints}, 400                                
+     with open('answer_a.txt', 'rb') as af:                                      
+-        answer_flag = bas64.b85decod(af.read()).decod()                      
++        answer_flag = base64.b85decode(af.read()).decode()                      
+         closing, opening = answer_flag[-1:], answer_flag[:5]                    
+-        asert closing == '}' and opening == 'flag{'                            
++        assert closing == '}' and opening == 'flag{'                            
+         return {'answer_flag': answer_flag}, 200                                
+</code></pre>
+<p><img alt="image-20241105083117373" loading="lazy" decoding="async" width="679" height="243" src="/_astro/861427d3ebf3ebe976ae57c7516398a6a74e07c903b5cece621266ee8788da6c.webp" srcset=""></p>  </div> </article> </div> <div class="col-mb-12 col-offset-1 col-3 kit-hidden-tb" id="secondary" role="complementary" data-astro-cid-ssfzsv2f> <section class="widget toc-widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>目录</h3> <ul class="widget-list toc-list" data-astro-cid-ssfzsv2f> <li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-0" data-heading-index="0" data-astro-cid-ssfzsv2f> 01. 签到 (Web) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-1" data-heading-index="1" data-astro-cid-ssfzsv2f> 02. 喜欢做签到的 CTFer 你们好呀 (Web) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-2" data-heading-index="2" data-astro-cid-ssfzsv2f> 03. 猫咪问答（Hackergame 十周年纪念版）(General) </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-3" data-heading-index="3" data-astro-cid-ssfzsv2f> 01. 在 Hackergame 2015 比赛开始前一天晚上开展的赛前讲座是在哪个教室举行的？ </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-4" data-heading-index="4" data-astro-cid-ssfzsv2f> 02. 众所周知，Hackergame 共约 25 道题目。近五年（不含今年）举办的 Hackergame 中，题目数量最接近这个数字的那一届比赛里有多少人注册参加？ </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-5" data-heading-index="5" data-astro-cid-ssfzsv2f> 03. Hackergame 2018 让哪个热门检索词成为了科大图书馆当月热搜第一？ </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-6" data-heading-index="6" data-astro-cid-ssfzsv2f> 04. 在今年的 USENIX Security 学术会议上中国科学技术大学发表了一篇关于电子邮件伪造攻击的论文，在论文中作者提出了 6 种攻击方法，并在多少个电子邮件服务提供商及客户端的组合上进行了实验？ </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-7" data-heading-index="7" data-astro-cid-ssfzsv2f> 05. 10 月 18 日 Greg Kroah-Hartman 向 Linux 邮件列表提交的一个 patch 把大量开发者从 MAINTAINERS 文件中移除。这个 patch 被合并进 Linux mainline 的 commit id 是多少？ </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-8" data-heading-index="8" data-astro-cid-ssfzsv2f> 06. 大语言模型会把输入分解为一个一个的 token 后继续计算，请问这个网页的 HTML 源代码会被 Meta 的 Llama 3 70B 模型的 tokenizer 分解为多少个 token？ </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-9" data-heading-index="9" data-astro-cid-ssfzsv2f> 04. 打不开的盒 (General) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-10" data-heading-index="10" data-astro-cid-ssfzsv2f> 05. 每日论文太多了! (General) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-11" data-heading-index="11" data-astro-cid-ssfzsv2f> 06. 比大小王 (Web) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-12" data-heading-index="12" data-astro-cid-ssfzsv2f> 07. 旅行照片 (General) </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-13" data-heading-index="13" data-astro-cid-ssfzsv2f> 01. 题目 1-2 </a> </li><li class="toc-item toc-level-4" data-astro-cid-ssfzsv2f> <a href="#toc-14" data-heading-index="14" data-astro-cid-ssfzsv2f> 问题 1: 照片拍摄的位置距离中科大的哪个校门更近？（格式：X校区Y门，均为一个汉字） </a> </li><li class="toc-item toc-level-4" data-astro-cid-ssfzsv2f> <a href="#toc-15" data-heading-index="15" data-astro-cid-ssfzsv2f> 问题 2: 话说 Leo 酱上次出现在桁架上是……科大今年的 ACG 音乐会？活动日期我没记错的话是？（格式：YYYYMMDD） </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-16" data-heading-index="16" data-astro-cid-ssfzsv2f> 02. 题目 3-4 </a> </li><li class="toc-item toc-level-4" data-astro-cid-ssfzsv2f> <a href="#toc-17" data-heading-index="17" data-astro-cid-ssfzsv2f> 问题 3: 这个公园的名称是什么？（不需要填写公园所在市区等信息） </a> </li><li class="toc-item toc-level-4" data-astro-cid-ssfzsv2f> <a href="#toc-18" data-heading-index="18" data-astro-cid-ssfzsv2f> 问题 4: 这个景观所在的景点的名字是？（三个汉字） </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-19" data-heading-index="19" data-astro-cid-ssfzsv2f> 03. 题目 5-6 </a> </li><li class="toc-item toc-level-4" data-astro-cid-ssfzsv2f> <a href="#toc-20" data-heading-index="20" data-astro-cid-ssfzsv2f> 问题 5: 距离拍摄地最近的医院是？（无需包含院区、地名信息，格式：XXX医院） </a> </li><li class="toc-item toc-level-4" data-astro-cid-ssfzsv2f> <a href="#toc-21" data-heading-index="21" data-astro-cid-ssfzsv2f> 问题 6: 左下角的动车组型号是？ </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-22" data-heading-index="22" data-astro-cid-ssfzsv2f> 10. Node.js is Web Scale (Web) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-23" data-heading-index="23" data-astro-cid-ssfzsv2f> 11. PaoluGPT (Web) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-24" data-heading-index="24" data-astro-cid-ssfzsv2f> 12. 强大的正则表达式 (math) </a> </li><li class="toc-item toc-level-2" data-astro-cid-ssfzsv2f> <a href="#toc-25" data-heading-index="25" data-astro-cid-ssfzsv2f> 13. 惜字如金 3.0 (math) </a> </li><li class="toc-item toc-level-3" data-astro-cid-ssfzsv2f> <a href="#toc-26" data-heading-index="26" data-astro-cid-ssfzsv2f> 01. 题目 A </a> </li> </ul> </section> <section class="widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>最新文章</h3> <ul class="widget-list" data-astro-cid-ssfzsv2f> <li data-astro-cid-ssfzsv2f><a href="/posts/2026-summer-travel-shenzhen-hongkong" data-astro-cid-ssfzsv2f>2026 夏深圳和香港游记</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/my-recent-purchases" data-astro-cid-ssfzsv2f>最近买的一些东西</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/drone-rc-ota-package-reverse" data-astro-cid-ssfzsv2f>某无人机遥控器升级包逆向和解密</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/matebook-e-go-2023-and-windows-on-arm-review" data-astro-cid-ssfzsv2f>Matebook E Go 2023 和 WOA 体验</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/hardware-reverse-engineering" data-astro-cid-ssfzsv2f>硬件逆向工程入门</a></li> </ul> </section> <section class="widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>分类</h3> <ul class="widget-list" data-astro-cid-ssfzsv2f> <li data-astro-cid-ssfzsv2f><a href="/category/默认分类" data-astro-cid-ssfzsv2f>默认分类</a></li><li data-astro-cid-ssfzsv2f><a href="/category/信息安全" data-astro-cid-ssfzsv2f>信息安全</a></li><li data-astro-cid-ssfzsv2f><a href="/category/Android" data-astro-cid-ssfzsv2f>Android</a></li> </ul> </section> </div>  <script type="module">function d(){const r=document.querySelectorAll(".toc-list a"),s=document.querySelectorAll(".post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6");if(s.length===0||(s.forEach((e,o)=>{const t=e.tagName.substring(1);e.classList.add(`toc-${t}`),e.setAttribute("id",`toc-${o}`)}),r.length===0))return;let u="",i=!1,c=null;function a(e,o=!1){if(!e||i&&!o)return;u=e;let t=null;if(r.forEach(n=>{n.getAttribute("href")?.substring(1)===u?(n.classList.add("active"),t=n):n.classList.remove("active")}),t){const n=document.getElementById("secondary");if(n){const l=t.getBoundingClientRect(),f=n.getBoundingClientRect();(l.top<f.top||l.bottom>f.bottom)&&t.scrollIntoView({behavior:"smooth",block:"nearest"})}}}const g={root:null,rootMargin:"-5% 0px -80% 0px",threshold:[0,1]},b=new IntersectionObserver(e=>{if(i)return;const o=e.filter(t=>t.isIntersecting).sort((t,n)=>t.target.getBoundingClientRect().top-n.target.getBoundingClientRect().top);if(o.length>0){const t=o[0].target.getAttribute("id");t&&a(t)}},g);s.forEach(e=>b.observe(e)),r.forEach(e=>{e.addEventListener("click",o=>{const t=e.getAttribute("href")?.substring(1);t&&(i=!0,c&&clearTimeout(c),a(t,!0),c=window.setTimeout(()=>{i=!1},800))})})}d();document.addEventListener("astro:after-swap",d);</script>  </div> </div> </div> <footer id="footer" role="contentinfo"> <!-- Fancybox --> <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@latest/dist/fancybox/fancybox.umd.js"></script> <script>
+        function initFancybox() {
+            const postContent = document.querySelector('.post-content');
+            if (postContent) {
+                const imgs = postContent.querySelectorAll('img');
+                imgs.forEach(img => {
+                    // Remove width and height attributes
+                    // img.removeAttribute('width');
+                    // img.removeAttribute('height');
+
+                    // Wrap image with anchor tag for Fancybox if not already wrapped
+                    if (!img.parentElement.closest('a')) {
+                        const anchor = document.createElement('a');
+                        anchor.href = img.src;
+                        anchor.dataset.fancybox = 'gallery';
+                        anchor.dataset.caption = img.alt || '';
+                        
+                        img.parentNode.insertBefore(anchor, img);
+                        anchor.appendChild(img);
+                    }
+                });
+            }
+
+            if (typeof Fancybox !== 'undefined') {
+                Fancybox.bind("[data-fancybox]", {
+                    groupAll: true
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initFancybox);
+        document.addEventListener("astro:page-load", initFancybox);
+    </script> <!-- Prism --> <script src="/prism/prism.js"></script> <script>
+        document.addEventListener("astro:page-load", () => {
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+&copy; 2026 <a href="/">azwhikaru&#39;s Lab</a>.
+    Chant 由 <a href="https://astro.build" target="_blank">Astro</a> 驱动.
+</footer> </body></html>

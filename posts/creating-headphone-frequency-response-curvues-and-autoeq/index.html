@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>手搓耳机频响曲线和适配 AutoEq</title><meta name="description" content="勤能补拙，熟能生巧"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@latest/dist/fancybox/fancybox.css"><link rel="stylesheet" href="/prism/prism.css"><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CAqDO0tx.js"></script><link rel="stylesheet" href="/_astro/Sidebar.DS-lAe7u.css"></head> <body> <header id="header" class="clearfix"> <div class="container"> <div class="row"> <div class="site-name col-mb-12 col-9"> <a id="logo" href="/">azwhikaru&#39;s Lab</a>
+                    <p class="description">勤能补拙，熟能生巧</p> </div> <div class="site-search col-3 kit-hidden-tb"> <form id="search" method="get" action="/search" role="search"> <label for="s" class="sr-only">搜索关键字</label> <input type="text" id="s" name="q" class="text" placeholder="输入关键字搜索"> <button type="submit" class="submit">搜索</button> </form> </div> <div class="col-mb-12"> <nav id="nav-menu" class="clearfix" role="navigation"> <a class href="/">首页</a><a class href="/about">关于</a> </nav> </div> </div> </div> </header> <div id="body"> <div class="container"> <div class="row">  <div class="col-mb-12 col-8" id="main" role="main"> <article class="post" itemscope itemtype="http://schema.org/BlogPosting"> <h1 class="post-title" itemprop="name headline"> 手搓耳机频响曲线和适配 AutoEq </h1> <ul class="post-meta"> <li> <i class="fa-regular fa-clock"></i> <time datetime="2025-03-25T00:00:00.000Z" itemprop="datePublished"> 2025-03-25 </time> </li> <li> <i class="fa-regular fa-folder"></i> <a href="/category/默认分类">默认分类</a> </li> </ul> <div class="post-content" itemprop="articleBody">  <p>AutoEq 项目提供了很多耳机的频响曲线文件，但如果你的耳机不在此列，也可以通过频响曲线的图片手搓频响曲线和适配 AutoEq</p>
+<p>频响曲线，就是下面图片这样的了。耳机的官网和商品详情页通常会有</p>
+<p>以刚到手的 <a href="https://www.dunu-topsound.com/titans2">达音科 TITAN S2</a> 为例。下面的频响曲线图片里标了完整的刻度，所以操作起来会比较容易</p>
+<p><img src="https://static.wixstatic.com/media/258514_a885ad41b1784eb3bedb98b6d386ddda~mv2.jpg/v1/fill/w_1484,h_796,al_c,q_85,enc_avif,quality_auto/FR_JPG.jpg" alt="img"></p>
+<p>先要将图片上的数据转换成数字，可以使用 <a href="https://apps.automeris.io/wpd4/">WebPlotDigitizer</a> 这个工具。最新的版本是 V5，强制登录才可以使用，就用老版本 V4 了</p>
+<p>先点击右侧的 <strong>Load Image</strong> 载入频响曲线的图片</p>
+<p><img alt="QQ_1742911452880" loading="lazy" decoding="async" width="323" height="204" src="/_astro/011e538e7f38257ceddd9fa88b07aa099cbdaa4f4866ead7183828d8911ce87b.webp" srcset=""></p>
+<p>类型保持默认的 <strong>2D (X-Y) Plot</strong> 即可</p>
+<p><img alt="QQ_1742911484794" loading="lazy" decoding="async" width="520" height="383" src="/_astro/f9929b29a908888b6cde9b0044b0beb10717b22880b7ed7840815dccd57d9b0b.webp" srcset=""></p>
+<p>下面需要在图片上标出 4 个点</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="center">名称</th><th align="center">作用</th></tr></thead><tbody><tr><td align="center">X1</td><td align="center">标记 X 轴有效值起点</td></tr><tr><td align="center">X2</td><td align="center">标记 X 轴有效值终点</td></tr><tr><td align="center">Y1</td><td align="center">标记 Y 轴有效值起点</td></tr><tr><td align="center">Y2</td><td align="center">标记 Y 轴有效值终点</td></tr></tbody></table>
+<p>频响曲线的 X 轴基本上都是 20 - 20kHz，这是人耳能听到的的频响范围</p>
+<p>因此，X1 放在 X 轴起点，X2 放在 X 轴终点。X1 和 X2 应尽量在同一水平线上</p>
+<p><img alt="QQ_1742911695867" loading="lazy" decoding="async" width="2017" height="1086" src="/_astro/6ad3b6d7c836305180681e937ce420cc857f2c5b3715b5fcdf455efdb12f22bf.webp" srcset=""></p>
+<p>Y 轴同理。Y1 放在 Y 轴有效值起点，Y2 放在放在 Y 轴的最大值就可以了。Y1 和 Y2 应尽量在同一垂直线上</p>
+<p><img alt="QQ_1742911839519" loading="lazy" decoding="async" width="2015" height="1084" src="/_astro/49b4d092b914d788a5cdfaef521c98db4c8250826af3e1fba6b7b559d8dd7acf.webp" srcset=""></p>
+<p>标记完 4 个点后，点击右侧的 <strong>Complete!</strong></p>
+<p><img alt="QQ_1742911880888" loading="lazy" decoding="async" width="313" height="178" src="/_astro/eb6d34f1d2e89dcbd1fca033dbe8b3a4bc0295fc33d7757144953b3253c0a73a.webp" srcset=""></p>
+<p>在弹出对话框中输入 X1、X2、Y1、Y2 在图中对应的刻度。因为 X 轴的刻度分布是不均匀的，所以勾选 <strong>Log Scale</strong></p>
+<p><img alt="QQ_1742912032011" loading="lazy" decoding="async" width="762" height="518" src="/_astro/cbfd325454b65ef830e1619039ffac75ef1b238968aa100e23158da97819fc6f.webp" srcset=""></p>
+<p>接下来，在右侧点击 Color 旁边的色块，选中曲线的颜色</p>
+<p><img alt="QQ_1742912228624" loading="lazy" decoding="async" width="316" height="302" src="/_astro/7c2adfbb5840738f528ff9ad0785fc2b5027dff253cc11b908b6db50dca94ce6.webp" srcset=""></p>
+<p><img alt="QQ_1742912284256" loading="lazy" decoding="async" width="319" height="320" src="/_astro/e13c73eefdd78184da8dd574fbaa383784cbb60e095d56fc81621ad21b58849a.webp" srcset=""></p>
+<p>点击右侧的 <strong>Run</strong></p>
+<p><img alt="QQ_1742912296903" loading="lazy" decoding="async" width="316" height="299" src="/_astro/3b4ef0ce6465cb898078d6a7b58c4c532c17de36001fad9cd241e8cca8ac38a2.webp" srcset=""></p>
+<p>程序会自动标注曲线上的点。如果点 <strong>数量太多、太少，或看起来不均匀</strong>，则可以在左侧菜单运行 <strong>Clear Data</strong> 后调整参数，再次标注。或者通过右侧工具栏手动微调每一个点</p>
+<p>看起来自动标注的结果还不错</p>
+<p><img alt="QQ_1742912326838" loading="lazy" decoding="async" width="2015" height="1085" src="/_astro/f5f5726e0b6511624c26dfd71599ee3d73afb704338e9da1c9bf77eeadcc293c.webp" srcset=""></p>
+<p>点击左侧菜单的 <strong>View Data</strong>。在弹出的对话框中设置 <strong>按照 X 轴升序排序</strong> 且 <strong>保留小数点后 2 位</strong></p>
+<p><img alt="QQ_1742912531231" loading="lazy" decoding="async" width="1009" height="613" src="/_astro/ee814467312ca6671ec895ff41570247cc1277f102ec4fd681d9b805935bad8d.webp" srcset=""></p>
+<p>点击 <strong>Download .CSV</strong> 导出曲线文件</p>
+<p>进入 <a href="https://autoeq.app/">AutoEq 网站</a>。选择搜索框右侧的 <strong>Open CSV file</strong>，选择刚才保存的曲线文件</p>
+<p><img alt="QQ_1742912629610" loading="lazy" decoding="async" width="656" height="124" src="/_astro/88ee072647b4de84ca4396b6c582ae57a8bce50ae29445dd0a58bb7488898e34.webp" srcset=""></p>
+<p>在左侧菜单选择目标曲线，AutoEq 就会自动调整均衡器来匹配目标曲线</p>
+<p><img alt="QQ_1742912681993" loading="lazy" decoding="async" width="568" height="682" src="/_astro/ff0b3062a2bc5bfd8ef382bd9dc8442944c1f7783b12eac490517fd9ac941ff4.webp" srcset=""></p>
+<p>例如 Harman IE 2019。可以在中间的图表看到调节前后的差别</p>
+<p><img alt="QQ_1742912726811" loading="lazy" decoding="async" width="1699" height="755" src="/_astro/ceaf4305c8c6a6f2838fd48e04ce2a784c5e020ba013727d0960a414338d4dd7.webp" srcset=""></p>
+<p>在右侧选择使用的均衡器 App，就可以直接导出预设了</p>
+<p><img alt="QQ_1742912760984" loading="lazy" decoding="async" width="561" height="627" src="/_astro/5e73d927c18b1cf1331f18c79b408deabbc8e60ee0cd7098d145bdebb3b3053d.webp" srcset=""></p>
+<p>是否变好听就见仁见智了。不过如果操作是正确的，应该起码不会变难听</p>  </div> </article> </div> <div class="col-mb-12 col-offset-1 col-3 kit-hidden-tb" id="secondary" role="complementary" data-astro-cid-ssfzsv2f>  <section class="widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>最新文章</h3> <ul class="widget-list" data-astro-cid-ssfzsv2f> <li data-astro-cid-ssfzsv2f><a href="/posts/2026-summer-travel-shenzhen-hongkong" data-astro-cid-ssfzsv2f>2026 夏深圳和香港游记</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/my-recent-purchases" data-astro-cid-ssfzsv2f>最近买的一些东西</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/drone-rc-ota-package-reverse" data-astro-cid-ssfzsv2f>某无人机遥控器升级包逆向和解密</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/matebook-e-go-2023-and-windows-on-arm-review" data-astro-cid-ssfzsv2f>Matebook E Go 2023 和 WOA 体验</a></li><li data-astro-cid-ssfzsv2f><a href="/posts/hardware-reverse-engineering" data-astro-cid-ssfzsv2f>硬件逆向工程入门</a></li> </ul> </section> <section class="widget" data-astro-cid-ssfzsv2f> <h3 class="widget-title" data-astro-cid-ssfzsv2f>分类</h3> <ul class="widget-list" data-astro-cid-ssfzsv2f> <li data-astro-cid-ssfzsv2f><a href="/category/默认分类" data-astro-cid-ssfzsv2f>默认分类</a></li><li data-astro-cid-ssfzsv2f><a href="/category/信息安全" data-astro-cid-ssfzsv2f>信息安全</a></li><li data-astro-cid-ssfzsv2f><a href="/category/Android" data-astro-cid-ssfzsv2f>Android</a></li> </ul> </section> </div>  <script type="module">function d(){const r=document.querySelectorAll(".toc-list a"),s=document.querySelectorAll(".post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6");if(s.length===0||(s.forEach((e,o)=>{const t=e.tagName.substring(1);e.classList.add(`toc-${t}`),e.setAttribute("id",`toc-${o}`)}),r.length===0))return;let u="",i=!1,c=null;function a(e,o=!1){if(!e||i&&!o)return;u=e;let t=null;if(r.forEach(n=>{n.getAttribute("href")?.substring(1)===u?(n.classList.add("active"),t=n):n.classList.remove("active")}),t){const n=document.getElementById("secondary");if(n){const l=t.getBoundingClientRect(),f=n.getBoundingClientRect();(l.top<f.top||l.bottom>f.bottom)&&t.scrollIntoView({behavior:"smooth",block:"nearest"})}}}const g={root:null,rootMargin:"-5% 0px -80% 0px",threshold:[0,1]},b=new IntersectionObserver(e=>{if(i)return;const o=e.filter(t=>t.isIntersecting).sort((t,n)=>t.target.getBoundingClientRect().top-n.target.getBoundingClientRect().top);if(o.length>0){const t=o[0].target.getAttribute("id");t&&a(t)}},g);s.forEach(e=>b.observe(e)),r.forEach(e=>{e.addEventListener("click",o=>{const t=e.getAttribute("href")?.substring(1);t&&(i=!0,c&&clearTimeout(c),a(t,!0),c=window.setTimeout(()=>{i=!1},800))})})}d();document.addEventListener("astro:after-swap",d);</script>  </div> </div> </div> <footer id="footer" role="contentinfo"> <!-- Fancybox --> <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@latest/dist/fancybox/fancybox.umd.js"></script> <script>
+        function initFancybox() {
+            const postContent = document.querySelector('.post-content');
+            if (postContent) {
+                const imgs = postContent.querySelectorAll('img');
+                imgs.forEach(img => {
+                    // Remove width and height attributes
+                    // img.removeAttribute('width');
+                    // img.removeAttribute('height');
+
+                    // Wrap image with anchor tag for Fancybox if not already wrapped
+                    if (!img.parentElement.closest('a')) {
+                        const anchor = document.createElement('a');
+                        anchor.href = img.src;
+                        anchor.dataset.fancybox = 'gallery';
+                        anchor.dataset.caption = img.alt || '';
+                        
+                        img.parentNode.insertBefore(anchor, img);
+                        anchor.appendChild(img);
+                    }
+                });
+            }
+
+            if (typeof Fancybox !== 'undefined') {
+                Fancybox.bind("[data-fancybox]", {
+                    groupAll: true
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initFancybox);
+        document.addEventListener("astro:page-load", initFancybox);
+    </script> <!-- Prism --> <script src="/prism/prism.js"></script> <script>
+        document.addEventListener("astro:page-load", () => {
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+&copy; 2026 <a href="/">azwhikaru&#39;s Lab</a>.
+    Chant 由 <a href="https://astro.build" target="_blank">Astro</a> 驱动.
+</footer> </body></html>
